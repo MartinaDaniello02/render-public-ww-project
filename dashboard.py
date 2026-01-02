@@ -128,6 +128,8 @@ def find_country_from_code(code, selected_dataset):
 # Applicazione
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
+server=app.server
+
 def welcome_page():
     return dbc.Container([
         html.H1("Welcome to CQ World Wide WPX Contest Dashboard", style={'text-align': 'center', 'margin-top':'70px', 'font-size':'60px'}),
@@ -1568,3 +1570,4 @@ def select_dataset(ssb_click, cw_click, ssb_cw_click):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
