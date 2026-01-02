@@ -13,10 +13,13 @@ script_dir = os.path.abspath(__file__)
 parent_dir = os.path.dirname(script_dir)
 
 # Si ottengono i percorsi dei file .csv
-cw_data_path = os.path.join(parent_dir, "cw_data.csv")
-ssb_data_path = os.path.join(parent_dir, "ssb_data.csv")
-prefix_data_path = os.path.join(parent_dir, "correct_countries_prefixes.csv")
-country_codes_data_path = os.path.join(parent_dir, "country_codes.csv")
+cw_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/cw_data.csv"
+
+ssb_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/ssb_data.csv"
+
+prefix_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/correct_countries_prefixes.csv"
+
+country_codes_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/country_codes.csv"
 
 # Vengono caricati i dataframe
 cw_score_df = pd.read_csv(cw_data_path, sep = ";")
@@ -1570,4 +1573,5 @@ def select_dataset(ssb_click, cw_click, ssb_cw_click):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
