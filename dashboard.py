@@ -411,8 +411,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
     dropdown_years = dcc.Dropdown(
         id="select-year",
         className= "year-dropdown",
-        options=[],
-        value="2024",
+        value=2024,
         style={'font-size': '20px'},
         clearable= False,
     )
@@ -447,7 +446,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
                             'y_max': global_y_max_buffered
                         })          
                     ],
-                    style={'width':800, 'margin-top': 20}
+                    style={'width':800, 'height':800, 'margin-top': 20}
                     ),
                     dbc.Col([               
                         dbc.Row([                    
@@ -477,7 +476,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
                             'max_score': max_score
                         })   
                     ],
-                    style={'width':800}
+                    style={'width':800, 'height':800}
                     ),
                 ],
                 style={'width': 1600, 'margin-bottom': 20}
