@@ -1,7 +1,6 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-#from plotly.subplots import make_subplots
 import os
 import dash_bootstrap_components as dbc
 from dash import dash, html, dcc, State, Input, Output, callback_context
@@ -14,15 +13,6 @@ cw_data_path = os.path.join(BASE_DIR, "cw_data.csv")
 ssb_data_path = os.path.join(BASE_DIR, "ssb_data.csv")
 prefix_data_path = os.path.join(BASE_DIR, "correct_countries_prefixes.csv")
 country_codes_data_path = os.path.join(BASE_DIR, "country_codes.CSV")
-# Si ottiene il percorso della parent directory dello script
-# script_dir = os.path.abspath(__file__)
-# parent_dir = os.path.dirname(script_dir)
-
-# Si ottengono i percorsi dei file .csv
-# cw_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/cw_data.csv"
-# ssb_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/ssb_data.csv"
-# prefix_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/correct_countries_prefixes.csv"
-# country_codes_data_path = "https://raw.githubusercontent.com/MartinaDaniello02/render-public-ww-project/beafbe27d14c0c3273483e51992b1a1f3bce13a8/country_codes.csv"
 
 # Vengono caricati i dataframe
 cw_score_df = pd.read_csv(cw_data_path, sep = ";")

@@ -1,0 +1,58 @@
+body {
+  background-color: black;
+  color: white;
+  width: 3000px;
+}
+
+.navbar{
+  background-color: black !important;
+  color: white !important;
+  width: 1450px !important;  
+  text-align: left;
+}
+
+.btn-custom {
+  height: 100px;
+  width: 300px;
+  font-size: 28px;
+  
+  background-color: #343a40 !important;
+  color: white !important;
+}
+
+.btn-custom-home {
+  height: 70px;
+  width: 200px;
+  font-size: 28px;
+  margin-top: 20px;
+  margin-left: 0px;
+  
+  border-color: #343a40;
+  background-color: #343a40 !important;
+  color: white !important;
+}
+
+  
+.custom-row {
+  margin-top: 60px;
+}
+
+.tooltip-custom {
+  font-size: 26px;
+  justify-content: center;
+}
+
+.year-dropdown {
+  width: 100px;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+.year-dropdown .Select-menu-outer {
+  background-color: black;
+  color: white;
+}
+.year-dropdown .Select-option {
+  background-color: black;
+  color: white;
+}
+
