@@ -10,5 +10,17 @@
 
 . pagina a scorrimento, plot con un po' di spiegazione a lato, indici più grandi e leggibili
 
-. 
+. aggiungere un grafico per le ore lavorate
 
+
+
+"#E58606",  # arancione
+"#5D69B1",  # blu
+"#52BCA3",  # verde acqua
+"#99C945",  # verde
+"#CC61B0",  # viola
+"#24796C",  # teal scuro
+"#DAA51B",  # giallo senape
+"#2F8AC4",  # azzurro
+"#764E9F",  # viola scuro
+"#ED645A",  # rosso

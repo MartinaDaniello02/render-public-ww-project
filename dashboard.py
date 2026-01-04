@@ -230,6 +230,11 @@ def single_data_dashboard_page(selected_dataset, title_string):
     unique_years = selected_dataset['Year'].unique()
     merged_mean_df = pd.DataFrame({'Year': unique_years})
     mean_total_QSOs = calculate_mean(selected_dataset, 'QSOs')
+    mean_total_WPX = calculate_mean(selected_dataset, 'WPX')
+
+    # Dataset con medie di qso e wpx e anno
+    mean_qso_wpx_df = pd.merge(merged_mean_df, mean_total_QSOs, on='Year', how='left')
+    mean_qso_wpx_df = pd.merge(mean_qso_wpx_df, mean_total_WPX, on='Year', how='left' )
 
     # Vengono rappresentate in un linechart le medie dei QSO totali e quelle nelle singole bande
     for band in bands:
@@ -379,6 +384,14 @@ def single_data_dashboard_page(selected_dataset, title_string):
         value=True
     )
 
+    # Componente Switch per scegliere se visualizzare qso e wpx a confronto o solo wpx    
+    enable_qso_switch = dbc.Switch(
+        id="enable-qso",
+        label="Show mean of QSOs",
+        style= {'font-size': '20px'},
+        value=True
+    )
+
     # Componente Switch per la selezione del tipo di plot da visualizzare (istogramma o scatterplot)
     scatter_switch = dbc.Switch(
         id="select-graph-type",
@@ -434,12 +447,15 @@ def single_data_dashboard_page(selected_dataset, title_string):
             'y_min': global_y_min_buffered,
             'y_max': global_y_max_buffered
         }),
+        dcc.Store(id="mean-qso-wpx", data=mean_qso_wpx_df.to_dict('records')),
         dbc.Row(
             dbc.Col(
                 html.H3(f'Data from 2005 to 2024 for {title_string} contest'),
             )
         ),
         # QSO e WPX sulle diverse bande, due linechart affiancati nelle due colonne
+        # primo linechart, quello dei qso totali e sulle singole bande
+        # secondo linechart, media dei wpx negli anni a confronto con la media dei qso totali
         dbc.Row([            
             dbc.Col([
                 html.Div([
@@ -452,7 +468,11 @@ def single_data_dashboard_page(selected_dataset, title_string):
                 ],style={"display": "flex", "alignItems": "center"}
                 ),    
                 dcc.Graph(id="band-line-chart")
-            ], style={'max-width':1000, 'height':500})       
+            ], style={'max-width':1000, 'height':500}),
+            dbc.Col([
+                enable_qso_switch,
+                dcc.Graph(id="wpx-qso-linechart")
+            ], style={'max-width':1000, 'height':500})    
         ]),
             
         # vincitori, barchart con scelta tra wpx e qso, colonna che elenca i vincitori
@@ -636,6 +656,15 @@ def update_band_line_chart(selected_band, selected_template, merged_mean_data, g
     x_max = global_ranges['x_max']
     y_min = global_ranges['y_min']
     y_max = global_ranges['y_max']
+    color_map = {
+        "TotalQSOs": "#E58606",
+        "160M": "#ED645A",
+        "80M": "#52BCA3",
+        "40M": "#5D69B1",
+        "20M": "#99C945",
+        "15M": "#CC61B0",
+        "10M": "#764E9F",
+    }
     if selected_band == "All":
         bands_to_plot = ['TotalQSOs','160M', '80M', '40M', '20M', '15M', '10M']
     else:
@@ -649,11 +678,64 @@ def update_band_line_chart(selected_band, selected_template, merged_mean_data, g
         labels={"Year": "Year", selected_band: f"{selected_band}"},
         markers=True,
         template=selected_template,
-        color_discrete_sequence=px.colors.qualitative.Vivid
+        color_discrete_map=color_map
     )
     fig_band_line_chart.update_xaxes(title='Year', range=[x_min, x_max])
     fig_band_line_chart.update_yaxes(title='Mean of QSOs', range=[y_min, y_max])
+    fig_band_line_chart.update_layout(
+        margin=dict(
+            l=60,
+            r=160,
+            t=60,
+            b=60,
+        )
+    )
     return fig_band_line_chart
+
+#callback per la creazione del linechart del confronto media wpx e qso
+@app.callback(
+    Output("wpx-qso-linechart", "figure"),
+    [Input('selected-template', 'data'),
+     Input("enable-qso", "value")],
+    [State("mean-qso-wpx", "data"),
+     State("global-ranges", "data")]
+    
+)
+def update_qso_wpx_linechart(selected_template, enable_qso, mean_df, global_ranges):
+    x_min = global_ranges['x_min']
+    x_max = global_ranges['x_max']
+    y_min = global_ranges['y_min']
+    y_max = global_ranges['y_max']
+    color_map = {
+        "QSOs": "#E58606",
+        "WPX": "#2F8AC4"
+    }
+    if enable_qso:
+        data_to_plot = ["WPX", "QSOs"]
+    else:
+        data_to_plot = ["WPX"]
+    fig_qso_wpx_line_chart = px.line(
+        mean_df,
+        x='Year',
+        y=data_to_plot,
+        title=f"Comparsion of mean QSOs and WPXs",
+        labels={"Year": "Year"},
+        markers=True,
+        template=selected_template,
+        color_discrete_map=color_map
+    )
+    fig_qso_wpx_line_chart.update_xaxes(title='Year', range=[x_min, x_max])
+    fig_qso_wpx_line_chart.update_yaxes(title='Mean of data', range=[y_min, y_max])
+    fig_qso_wpx_line_chart.update_layout(
+        margin=dict(
+            l=60,
+            r=160,
+            t=60,
+            b=60,
+        ),
+        showlegend=True
+    )
+    return fig_qso_wpx_line_chart
 
 # Callback per aggiornare l'istogramma/scatterplot sui club
 @app.callback(
@@ -810,7 +892,12 @@ def update_map(selected_continent, selected_type, selected_template, country_cou
         color_continuous_scale=custom_colorscale,
         title=f"Number of {selected_type_of_rapresentation} from 2005 to 2024 per Country"
     ).update_layout(
-        margin=dict(l=0, r=0, t=50, b=0),
+        margin=dict(
+            l=60,
+            r=100,
+            t=60,
+            b=60,
+        ),
         height=700,
         width = 1400,
         title_y= 0.95,
