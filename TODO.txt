@@ -2,7 +2,13 @@
 
 - rivedere la struttura dal progetto, lavorare su una dashboard alla volta
 
+- perché render veda un navigamento della pagina si deve trovare una soluzione diversa a quella delle callbacks
 --------------------------------------------
 
+. la navbar deve avere la stessa lunghezza di tutta la pagina
+. la pagina deve essere meglio strutturata, i plot avere misure fisse ma la pagina deve essere a scorrimento
 
+. pagina a scorrimento, plot con un po' di spiegazione a lato, indici più grandi e leggibili
+
+. 
 
