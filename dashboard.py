@@ -448,6 +448,27 @@ def single_data_dashboard_page(selected_dataset, title_string):
             'y_max': global_y_max_buffered
         }),
         dcc.Store(id="mean-qso-wpx", data=mean_qso_wpx_df.to_dict('records')),
+        dcc.Store(id='supercat', data = supercat_count_per_year.to_dict('records')),
+        dcc.Store(id='y-data-to-plot', data='Score'),
+        dcc.Store(id='select-winner-country', data = None),
+        dcc.Store(id='winners-table', data= winners_table.to_dict('records')),
+        dcc.Store(id='winners-QSO-WPX-score', data={
+            'max_QSO': max_QSO,
+            'max_WPX': max_WPX,
+            'max_score': max_score
+        }),   
+        
+        dcc.Store(id='global-ranges-QSO-WPX', data={
+            'x_min_QSO': global_x_min_QSO_buffered,
+            'x_max_QSO': global_x_max_QSO_buffered,
+            'y_min_QSO': global_y_min_QSO_buffered,
+            'y_max_QSO': global_y_max_QSO_buffered,
+            'x_min_WPX': global_x_min_WPX_buffered,
+            'x_max_WPX': global_x_max_WPX_buffered,
+            'y_min_WPX': global_y_min_WPX_buffered,
+            'y_max_WPX': global_y_max_WPX_buffered
+        }),      
+
         dbc.Row(
             dbc.Col(
                 html.H3(f'Data from 2005 to 2024 for {title_string} contest'),
@@ -465,8 +486,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
                         style={'font-size':'20px', 'margin-right':'7px'}
                     ),
                     radio_band
-                ],style={"display": "flex", "alignItems": "center"}
-                ),    
+                ],style={"display": "flex", "alignItems": "center"}),                    
                 dcc.Graph(id="band-line-chart")
             ], style={'max-width':1000, 'height':500}),
             dbc.Col([
@@ -477,20 +497,51 @@ def single_data_dashboard_page(selected_dataset, title_string):
             
         # vincitori, barchart con scelta tra wpx e qso, colonna che elenca i vincitori
         # negli anni, linechart che mostra i vincitori selezionati
-        dbc.Row(
-            [
-                dbc.Col([]),
-                dbc.Col([]),
-                dbc.Col([]),
-            ]
-        ),
+        dbc.Row([            
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Select y axis:",
+                        html_for="select-winner-y",
+                        style={'font-size':'20px', 'margin-right':'7px'}
+                    ),
+                    radio_winner_y
+                ],style={"display": "flex", "alignItems": "center"}),                
+                dcc.Graph(id='winner-barchart')
+            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
+            dbc.Col([
+                dcc.Graph(id="winner-linechart")
+            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'})
+        ]),
+        
         # rappresentazione dei club, cambiare i plot che sono brutti
         dbc.Row(
-            dbc.Col([])
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Select year:",
+                        html_for="select-year",
+                        style={'font-size':'20px', 'margin-right':'7px'}
+                    ),
+                    dropdown_years
+                ],style={"display": "flex", "alignItems": "center"}),
+                html.Div([
+                    dbc.Label(
+                        "Select x axis:",
+                        html_for="select-scatter-x",
+                        style={'font-size':'20px', 'margin-right':'7px'}
+                    ),
+                    radio_scatter_x
+                ],style={"display": "flex", "alignItems": "center"}),
+                scatter_switch,
+                dcc.Graph(id="club-chart")
+            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'})
         ),
         #categorie di partecipazione, scegliere un grafico più bello magari
         dbc.Row(
-            dbc.Col([])
+            dbc.Col([
+                dcc.Graph(id= 'category-linechart')
+            ], style={'max-width':1000, 'height':500, 'margin-top':'200px'})
         ),
         # mappa del mondo
         dbc.Row([
@@ -508,133 +559,10 @@ def single_data_dashboard_page(selected_dataset, title_string):
         ]),
         dbc.Row(
             dbc.Col([
-                dcc.Graph(id="map-graph")
+                dcc.Graph(id="map-graph", config={"scrollZoom": False})                
             ], style={'width':700, 'margin-top':'20px', 'margin-bottom':'100px'})
         )
     ], fluid=True)
-
-
-
-
-
-        # dbc.Row([
-        #     dbc.Row([
-        #         dbc.Col([
-        #             dbc.Col(html.H1('CQ World Wide WPX Contest  -  ')),
-        #             dbc.Col(html.H3(f'Data from 2005 to 2024 for {title_string} contest'),style={'margin-top':13}),
-        #         ],
-        #         style={'display':'flex','max-width':1120}
-        #         )
-        #     ]),
-        #     dbc.Col([
-        #         dbc.Row([
-        #             dbc.Col([
-        #                 dbc.Row([                    
-        #                     dbc.Col(html.P("Select band:"), style={'font-size': '20px'}),
-        #                     dbc.Col(radio_band, style={'margin-top':5}, width = 'auto')
-        #                 ],
-        #                 style={'margin-top': '30px'}
-        #                 ),          
-        #                 dcc.Graph(id="band-line-chart"),
-        #                 dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
-        #                 dcc.Store(id='global-ranges', data={
-        #                     'x_min': global_x_min_buffered,
-        #                     'x_max': global_x_max_buffered,
-        #                     'y_min': global_y_min_buffered,
-        #                     'y_max': global_y_max_buffered
-        #                 })          
-        #             ],
-        #             style={'width':800, 'height':800, 'margin-top': 20}
-        #             ),
-        #             dbc.Col([               
-        #                 dbc.Row([                    
-        #                     dbc.Col(html.P("Select year:"), style={'margin-top':'15px','font-size': '20px'}, width="auto"),
-        #                     dbc.Col(dropdown_years, width="auto")
-        #                 ]),
-        #                 dbc.Row([
-        #                     dbc.Col(html.P("Select x axis:"), width="auto", style={'font-size': '20px'}),
-        #                     dbc.Col(radio_scatter_x, width="auto"),
-        #                     dbc.Col(scatter_switch, width="auto")
-        #                 ]),          
-        #                 dcc.Graph(id="club-chart"),
-        #                 dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
-        #                 dcc.Store(id='global-ranges-QSO-WPX', data={
-        #                     'x_min_QSO': global_x_min_QSO_buffered,
-        #                     'x_max_QSO': global_x_max_QSO_buffered,
-        #                     'y_min_QSO': global_y_min_QSO_buffered,
-        #                     'y_max_QSO': global_y_max_QSO_buffered,
-        #                     'x_min_WPX': global_x_min_WPX_buffered,
-        #                     'x_max_WPX': global_x_max_WPX_buffered,
-        #                     'y_min_WPX': global_y_min_WPX_buffered,
-        #                     'y_max_WPX': global_y_max_WPX_buffered
-        #                 }),
-        #                 dcc.Store(id='winners-QSO-WPX-score', data={
-        #                     'max_QSO': max_QSO,
-        #                     'max_WPX': max_WPX,
-        #                     'max_score': max_score
-        #                 })   
-        #             ],
-        #             style={'width':800, 'height':800}
-        #             ),
-        #         ],
-        #         style={'width': 1600, 'margin-bottom': 20}
-        #         ),
-        #         dbc.Row([
-        #             dbc.Row([
-        #                 dbc.Col(winner_switch),
-        #                 dbc.Col([                        
-        #                     dbc.Col(html.P("Focus on:"), style={ 'width': '100px', 'margin-right': '50px', 'font-size': '20px'}),
-        #                     dbc.Col(radio_continents),
-        #                     dcc.Store(id='country-counts',data=country_counts.to_dict('records')),
-        #                     dcc.Store(id='winner-counts', data = winner_counts.to_dict('records'))
-
-        #                 ],
-        #                 style={'display': 'flex'}
-        #                 )                                 
-        #             ],
-        #             style={'margin-top': 15}
-        #             ),
-        #             dbc.Row(                    
-        #                 dcc.Graph(id='map-graph')            
-        #             )
-        #         ],
-        #         style={'width': 1600}
-        #         )
-        #     ],
-        #     style={'width': 1600}
-        #     ), 
-        #     dcc.Store(id='y-data-to-plot', data='Score'),
-        #     dcc.Store(id='select-winner-country', data = None),
-        #     dbc.Col([
-        #         dbc.Row([                    
-        #             dbc.Col(html.P("Select y axis:"), style={'font-size': '20px'}),
-        #             dbc.Col(radio_winner_y, width="auto")
-        #         ],
-        #         style={'width': 600}
-        #         ),
-        #         dbc.Row([
-        #             dcc.Store(id='winners-table', data= winners_table.to_dict('records')),
-        #             dcc.Graph(id='winner-barchart')            
-        #         ],
-        #         style={'width': 1000, 'height': 450}
-        #         ),
-        #         dbc.Row([
-        #             dcc.Graph(id="winner-linechart")                       
-        #         ],
-        #         style={'width': 1000, 'height': 450}
-        #         ),
-        #         dbc.Row([
-        #             dcc.Store(id='supercat', data = supercat_count_per_year.to_dict('records')),
-        #             dcc.Graph(id= 'category-linechart')
-        #         ],
-        #         style= {'width': 1000, 'margin-top': 20}
-        #         )
-        #     ],
-        #     style={'width': 1000, 'margin-left':0}
-        #     )
-        # ],
-        # style={'display':'flex','width': 2800, 'margin-top': 60}
-        # )
 
 
 ########################################################################

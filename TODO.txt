@@ -12,6 +12,8 @@
 
 . aggiungere un grafico per le ore lavorate
 
+. su render la mappa è estremamente lenta
+
 
 
 "#E58606",  # arancione
