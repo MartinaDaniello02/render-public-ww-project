@@ -364,7 +364,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
         id="winner-country-radio",
         options=[],
         value=None,
-        inline=True
+        inline=False
     )
 
     # Componente RadioItems per la selezione del continente da visualizzare nella mappa
@@ -496,7 +496,6 @@ def single_data_dashboard_page(selected_dataset, title_string):
         # negli anni, linechart che mostra i vincitori selezionati
         dbc.Row([            
             dbc.Col([
-                radio_winner_countries,
                 html.Div([
                     dbc.Label(
                         "Select y axis:",
@@ -507,9 +506,13 @@ def single_data_dashboard_page(selected_dataset, title_string):
                 ],style={"display": "flex", "alignItems": "center"}),                
                 dcc.Graph(id='winner-barchart')
             ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
+            dbc.Col([                
+                radio_winner_countries,
+                ], style={'max-width':'160px', 'margin-top':'150px'}
+            ),
             dbc.Col([
                 dcc.Graph(id="winner-linechart")
-            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'})
+            ], style={'max-width':1000, 'height':500, 'margin-top':'130px'})
         ]),
         
         # rappresentazione dei club
@@ -820,6 +823,7 @@ def update_winner_plots(selected_y):
         y_data_to_plot = "Score"
     return y_data_to_plot    
     
+# Callbacke per aggiornare il grafico barchart dei vincitori
 @app.callback(
     Output("winner-barchart", "figure"),
     [Input("y-data-to-plot", "data"),
@@ -847,28 +851,11 @@ def update_winner_barchart(selected_y, selected_template, color_map, winners_tab
     )
     return winners_figure
 
-# Callback per il click sul barchart dei vincitori
-@app.callback(
-    Output('select-winner-country', 'data'),
-    [Input('winner-barchart', 'clickData'),
-    State('winners-table', 'data')]
-)
-def update_selected_country(clickData, winners_table):
-    if isinstance(winners_table, list):
-        winners_table = pd.DataFrame(winners_table)
-    if clickData:
-        selected_year = clickData['points'][0]['x']
-        selected_country = winners_table.loc[winners_table['Year'] == selected_year, 'Country'].values[0]
-        return selected_country
-    else:
-        raise PreventUpdate  # Evita l'aggiornamento se non c'è alcun clickData
-
-# Callback per aggiornare il grafico a linee in base alla scelta del paese (tramite il click sul barchart)
+# Callback per aggiornare il grafico a linee in base alla scelta del paese (tramite il click sui radio button)
 @app.callback(
     Output("winner-linechart", "figure"),
-    [Input("select-winner-country", "data"),
-    #Input("y-data-to-plot", "data"),
-    Input("winner-country-radio", "value"),
+    [Input("winner-country-radio", "value"),
+    Input("y-data-to-plot", "data"),
     Input('selected-template', 'data'),
     Input('global-color-map', 'data')],
     [State('selected-data', 'data'),
