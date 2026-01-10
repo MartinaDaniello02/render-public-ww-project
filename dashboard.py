@@ -359,6 +359,14 @@ def single_data_dashboard_page(selected_dataset, title_string):
         inline = True
     )
 
+    # Componente RadioItems per la selezione del country vincitore
+    radio_winner_countries = dbc.RadioItems(
+        id="winner-country-radio",
+        options=[],
+        value=None,
+        inline=True
+    )
+
     # Componente RadioItems per la selezione del continente da visualizzare nella mappa
     radio_continents = dbc.RadioItems(
         id= "select-continent",
@@ -488,6 +496,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
         # negli anni, linechart che mostra i vincitori selezionati
         dbc.Row([            
             dbc.Col([
+                radio_winner_countries,
                 html.Div([
                     dbc.Label(
                         "Select y axis:",
@@ -777,6 +786,26 @@ def update_map(selected_continent, selected_type, selected_template, country_cou
     )
     return map_figure
 
+# Callback per popolare i radio button per la scelta del country vincitore
+@app.callback(
+    [Output("winner-country-radio", "options"),
+     Output("winner-country-radio", "value")],
+    Input("winners-table", "data")
+)
+def update_winner_country_radio(winners_table):
+    if not winners_table:
+        return [], None
+    df = pd.DataFrame(winners_table)
+    winner_countries = (
+        df["Country"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+    options = [{"label": c, "value": c} for c in sorted(winner_countries)]
+    value = options[0]["value"]
+    return options, value
+
 # Callback per aggiornare i due grafici sui vincitori in base alla scelta del dato da usare sull'asse y
 @app.callback(
         Output("y-data-to-plot", "data"),
@@ -838,7 +867,8 @@ def update_selected_country(clickData, winners_table):
 @app.callback(
     Output("winner-linechart", "figure"),
     [Input("select-winner-country", "data"),
-    Input("y-data-to-plot", "data"),
+    #Input("y-data-to-plot", "data"),
+    Input("winner-country-radio", "value"),
     Input('selected-template', 'data'),
     Input('global-color-map', 'data')],
     [State('selected-data', 'data'),
