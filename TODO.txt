@@ -32,3 +32,19 @@
 "#2F8AC4",  # azzurro
 "#764E9F",  # viola scuro
 "#ED645A",  # rosso
+
+------------------------------------------
+
+grafico per i club:
+
+    club o no club -> mostrare la media dei punteggi o dei wpx a confronto in un linechar
+    top 10 clubs -> punteggio qso oppure wpx in linechart
+        scelta 10, 50, 100 clubs migliori?
+
+grafico per le categorie:
+    implementare barra di ricerca e mostrare i risultati per quella categoria
+    mostrare di default solo le macro categorie, rimuovere però la scala logaritmica
+
+---------------------------------------------
+ideona: nella homepage implementare barra di ricerca per nominativo
+mostare i risultati per quello specifico nominativo, le statistiche relative a lui

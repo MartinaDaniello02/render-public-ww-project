@@ -297,7 +297,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
     global_x_min_buffered = global_x_min - buffer_percentage * global_x_range
     global_x_max_buffered = global_x_max + buffer_percentage * global_x_range
 
-    # Per lo scatterplot e l'istogramma quando vengono plottati i QSO
+    # Per l'istogramma dei club quando vengono plottati i QSO
     global_y_min_QSO = 0
     global_y_max_QSO = selected_dataset['Score'].max()
     global_y_QSO_range = global_y_max_QSO - global_y_min_QSO
@@ -310,7 +310,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
     global_x_min_QSO_buffered = global_x_min_QSO - buffer_percentage * global_x_QSO_range
     global_x_max_QSO_buffered = global_x_max_QSO + buffer_percentage * global_x_QSO_range
 
-    # Per lo scatterplot e l'istogramma quando vengono plottati i WPX
+    # Per l'istogramma dei club quando vengono plottati i WPX
     global_y_min_WPX = 0
     global_y_max_WPX = selected_dataset['Score'].max()
     global_y_WPX_range = global_y_max_WPX - global_y_min_WPX
@@ -392,17 +392,9 @@ def single_data_dashboard_page(selected_dataset, title_string):
         value=True
     )
 
-    # Componente Switch per la selezione del tipo di plot da visualizzare (istogramma o scatterplot)
-    scatter_switch = dbc.Switch(
-        id="select-graph-type",
-        label="Histogram/Scatterplot",
-        style={'font-size': '20px'},
-        value=True
-    )
-
-    # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse x dell'istogramma/scatterplot
-    radio_scatter_x = dbc.RadioItems(
-        id="select-scatter-x",
+    # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse x dell'istogramma dei club
+    radio_club_x = dbc.RadioItems(
+        id="select-club-x",
         options=[        
             {"label": "WPX (prefixes) ", "value": "WPX"},
             {"label": "QSOs", "value": "QSOs"},
@@ -425,7 +417,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
         inline=True
     )
 
-    #  Componente Dropdown per la selezione dell'anno nell'istogramma/scatterplot
+    #  Componente Dropdown per la selezione dell'anno nell'istogramma dei club
     dropdown_years = dcc.Dropdown(
         id="select-year",
         className= "year-dropdown",
@@ -456,8 +448,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
             'max_QSO': max_QSO,
             'max_WPX': max_WPX,
             'max_score': max_score
-        }),   
-        
+        }),
         dcc.Store(id='global-ranges-QSO-WPX', data={
             'x_min_QSO': global_x_min_QSO_buffered,
             'x_max_QSO': global_x_max_QSO_buffered,
@@ -528,12 +519,11 @@ def single_data_dashboard_page(selected_dataset, title_string):
                 html.Div([
                     dbc.Label(
                         "Select x axis:",
-                        html_for="select-scatter-x",
+                        html_for="select-club-x",
                         style={'font-size':'20px', 'margin-right':'7px'}
                     ),
-                    radio_scatter_x
+                    radio_club_x
                 ],style={"display": "flex", "alignItems": "center"}),
-                scatter_switch,
                 dcc.Graph(id="club-chart")
             ], style={'max-width':1000, 'height':500, 'margin-top':'100px'})
         ),
@@ -665,17 +655,16 @@ def update_qso_wpx_linechart(selected_template, enable_qso, mean_df, global_rang
     )
     return fig_qso_wpx_line_chart
 
-# Callback per aggiornare l'istogramma/scatterplot sui club
+# Callback per aggiornare l'istogramma sui club
 @app.callback(
     Output("club-chart", "figure"),
     [Input("select-year", "value"),
-    Input("select-scatter-x", "value"),
-    Input("select-graph-type", "value"),
+    Input("select-club-x", "value"),
     Input('selected-template', 'data')],
     [State("selected-data", "data"),
     State("global-ranges-QSO-WPX", "data")]    
 )
-def update_club_chart(selected_year, selected_x, is_histogram,selected_template, selected_dataset, global_ranges_QSO_WPX):     
+def update_club_chart(selected_year, selected_x, selected_template, selected_dataset, global_ranges_QSO_WPX):     
     if isinstance(selected_dataset, list):
         selected_dataset = pd.DataFrame(selected_dataset)
 
@@ -696,57 +685,35 @@ def update_club_chart(selected_year, selected_x, is_histogram,selected_template,
     y_min_WPX = global_ranges_QSO_WPX['y_min_WPX']
     y_max_WPX = global_ranges_QSO_WPX['y_max_WPX']
 
-    # Colori personalizzati per l'istogramma/scatterplot
+    # Colori personalizzati per l'istogramma dei club
     color_discrete_map = {
         'No Club Member': '#EF553B',
         'Club Member': '#636EFA'
     }
 
-    if is_histogram:
-        fig_club_chart = px.histogram(
-            data_selected_year,
-            x=selected_x,
-            y="Score",  
-            histfunc='avg',
-            color="Club Status",
-            title=f"Year: {selected_year}",
-            template= selected_template,            
-            color_discrete_map=color_discrete_map,            
-            category_orders={"Club Status": ['Club Member', 'No Club Member']}
-        )              
-        # Riscalamento degli assi 
-        if (selected_x == "QSOs"):
-            fig_club_chart.update_xaxes(range=[x_min_QSO, x_max_QSO])
-            fig_club_chart.update_yaxes(title='Mean of Score',range=[y_min_QSO, y_max_QSO])
-        
-        else:
-            fig_club_chart.update_xaxes(range=[x_min_WPX, x_max_WPX])
-            fig_club_chart.update_yaxes(title='Mean of Score', range=[y_min_WPX, y_max_WPX])
-
-        fig_club_chart.update_traces(
-            hovertemplate='<b>%{x}</b><br>Mean of Score: %{y}<br><extra></extra>'
-        )
-        
+    fig_club_chart = px.histogram(
+        data_selected_year,
+        x=selected_x,
+        y="Score",  
+        histfunc='avg',
+        color="Club Status",
+        title=f"Year: {selected_year}",
+        template= selected_template,            
+        color_discrete_map=color_discrete_map,            
+        category_orders={"Club Status": ['Club Member', 'No Club Member']}
+    )              
+    # Riscalamento degli assi 
+    if (selected_x == "QSOs"):
+        fig_club_chart.update_xaxes(range=[x_min_QSO, x_max_QSO])
+        fig_club_chart.update_yaxes(title='Mean of Score',range=[y_min_QSO, y_max_QSO])
+    
     else:
-        fig_club_chart = px.scatter(
-            data_selected_year,
-            x= selected_x,
-            y="Score",        
-            color="Club Status",
-            title=f"Year: {selected_year}",
-            template= selected_template,            
-            color_discrete_map=color_discrete_map,
-            category_orders={"Club Status": ['Club Member', 'No Club Member']}
-        )
-        # Riscalamento degli assi 
-        if (selected_x == "QSOs"):
-            fig_club_chart.update_xaxes(range=[x_min_QSO, x_max_QSO])
-            fig_club_chart.update_yaxes(range=[y_min_QSO, y_max_QSO])
-        
-        else:
-            fig_club_chart.update_xaxes(range=[x_min_WPX, x_max_WPX])
-            fig_club_chart.update_yaxes(range=[y_min_WPX, y_max_WPX])
-            
+        fig_club_chart.update_xaxes(range=[x_min_WPX, x_max_WPX])
+        fig_club_chart.update_yaxes(title='Mean of Score', range=[y_min_WPX, y_max_WPX])
+
+    fig_club_chart.update_traces(
+        hovertemplate='<b>%{x}</b><br>Mean of Score: %{y}<br><extra></extra>'
+    )      
         
     return fig_club_chart
 
@@ -1071,7 +1038,7 @@ def ssb_cw_dashboard_page(selected_dataset):
         inline = True
     )
 
-    # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse x dell'istogramma/scatterplot
+    # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse x dell'istogramma dei club
     radio_histogram_comparsion = dbc.RadioItems(
         id="select-histogram-x",
         options=[        
@@ -1083,7 +1050,7 @@ def ssb_cw_dashboard_page(selected_dataset):
         inline=True
     )
 
-    #  Componente Dropdown per la selezione dell'anno nell'istogramma/scatterplot
+    #  Componente Dropdown per la selezione dell'anno nell'istogramma dei club
     dropdown_years_comparsion = dcc.Dropdown(
         id="select-year-comparsion-histogram",
         className= "year-dropdown",
