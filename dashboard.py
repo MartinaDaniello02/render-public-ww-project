@@ -364,6 +364,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
         id="winner-country-radio",
         options=[],
         value=None,
+        style={'font-size': '20px'},
         inline=False
     )
 
@@ -508,7 +509,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
             ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
             dbc.Col([                
                 radio_winner_countries,
-                ], style={'max-width':'160px', 'margin-top':'150px'}
+                ], style={'max-width':'180px', 'margin-top':'150px'}
             ),
             dbc.Col([
                 dcc.Graph(id="winner-linechart")
@@ -799,13 +800,16 @@ def update_winner_country_radio(winners_table):
     if not winners_table:
         return [], None
     df = pd.DataFrame(winners_table)
-    winner_countries = (
-        df["Country"]
-        .dropna()
-        .unique()
-        .tolist()
+    country_year = (
+        df.groupby("Country")["Year"]
+        .min()
+        .reset_index()
+        .sort_values("Year")
     )
-    options = [{"label": c, "value": c} for c in sorted(winner_countries)]
+    options = [
+        {"label": row["Country"], "value": row["Country"]}
+        for _, row in country_year.iterrows()
+    ]
     value = options[0]["value"]
     return options, value
 
