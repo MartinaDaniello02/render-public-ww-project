@@ -1,3 +1,7 @@
+ usare https://cqww.com/api/get/geolist per ricevere la lista dei prefissi esistenti
+
+ -----------------------------------------------
+
 - aggiornare la welcome page
 
 - rivedere la struttura dal progetto, lavorare su una dashboard alla volta
@@ -13,6 +17,8 @@
 . aggiungere un grafico per le ore lavorate
 
 . su render la mappa è estremamente lenta
+
+---------------------------------------------------
 
 
 
