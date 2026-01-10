@@ -6,7 +6,9 @@
 
 - rivedere la struttura dal progetto, lavorare su una dashboard alla volta
 
-- perché render veda un navigamento della pagina si deve trovare una soluzione diversa a quella delle callbacks
+- mettere uno sfondo grigetto per la visuallizzazione light
+
+- mettere colore testo nelle label con più contrasto
 --------------------------------------------
 
 . la navbar deve avere la stessa lunghezza di tutta la pagina
@@ -19,8 +21,6 @@
 . su render la mappa è estremamente lenta
 
 ---------------------------------------------------
-
-
 
 "#E58606",  # arancione
 "#5D69B1",  # blu
@@ -43,8 +43,6 @@ grafico per i club:
 
 grafico per le categorie:
     implementare barra di ricerca e mostrare i risultati per quella categoria
-    mostrare di default solo le macro categorie, rimuovere però la scala logaritmica
-
 ---------------------------------------------
 ideona: nella homepage implementare barra di ricerca per nominativo
 mostare i risultati per quello specifico nominativo, le statistiche relative a lui

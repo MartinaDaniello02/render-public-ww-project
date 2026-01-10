@@ -392,11 +392,19 @@ def single_data_dashboard_page(selected_dataset, title_string):
         value=True
     )
 
+    # Componente Switch per scegliere se visualizzare in scala logaritmica nel grafico delle categorie    
+    logarithmic_scale_switch = dbc.Switch(
+        id="logarithmic-scale",
+        label="Use logarithmic scale for y axis",
+        style= {'font-size': '20px'},
+        value=True
+    )
+
     # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse x dell'istogramma dei club
     radio_club_x = dbc.RadioItems(
-        id="select-club-x",
+        id="select-club-y",
         options=[        
-            {"label": "WPX (prefixes) ", "value": "WPX"},
+            {"label": "WPXs", "value": "WPX"},
             {"label": "QSOs", "value": "QSOs"},
         ],
         value="WPX",
@@ -408,7 +416,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
     radio_winner_y = dbc.RadioItems(
         id="select-winner-y",
         options=[        
-            {"label": "WPX (prefixes) ", "value": "WPX"},
+            {"label": "WPXs", "value": "WPX"},
             {"label": "QSOs", "value": "QSOs"},
             {"label": "Total score", "value": "Score"}
         ],
@@ -416,16 +424,6 @@ def single_data_dashboard_page(selected_dataset, title_string):
         style={'font-size': '20px'},
         inline=True
     )
-
-    #  Componente Dropdown per la selezione dell'anno nell'istogramma dei club
-    dropdown_years = dcc.Dropdown(
-        id="select-year",
-        className= "year-dropdown",
-        value=2024,
-        style={'font-size': '20px'},
-        clearable= False,
-    )
-
 
     return dbc.Container([
         dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
@@ -505,22 +503,14 @@ def single_data_dashboard_page(selected_dataset, title_string):
             ], style={'max-width':1000, 'height':500, 'margin-top':'100px'})
         ]),
         
-        # rappresentazione dei club, cambiare i plot che sono brutti
+        # rappresentazione dei club
         dbc.Row(
             dbc.Col([
                 html.Div([
                     dbc.Label(
-                        "Select year:",
-                        html_for="select-year",
-                        style={'font-size':'20px', 'margin-right':'7px'}
-                    ),
-                    dropdown_years
-                ],style={"display": "flex", "alignItems": "center"}),
-                html.Div([
-                    dbc.Label(
-                        "Select x axis:",
-                        html_for="select-club-x",
-                        style={'font-size':'20px', 'margin-right':'7px'}
+                        "Select y axis:",
+                        html_for="select-club-y",
+                        style={'font-size':'20px', 'margin-right':'7px', 'margin-left':'30px'}
                     ),
                     radio_club_x
                 ],style={"display": "flex", "alignItems": "center"}),
@@ -530,6 +520,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
         #categorie di partecipazione, scegliere un grafico più bello magari
         dbc.Row(
             dbc.Col([
+                logarithmic_scale_switch,
                 dcc.Graph(id= 'category-linechart')
             ], style={'max-width':1000, 'height':500, 'margin-top':'200px'})
         ),
@@ -658,63 +649,42 @@ def update_qso_wpx_linechart(selected_template, enable_qso, mean_df, global_rang
 # Callback per aggiornare l'istogramma sui club
 @app.callback(
     Output("club-chart", "figure"),
-    [Input("select-year", "value"),
-    Input("select-club-x", "value"),
+    [Input("select-club-y", "value"),
     Input('selected-template', 'data')],
-    [State("selected-data", "data"),
-    State("global-ranges-QSO-WPX", "data")]    
+    State("selected-data", "data")    
 )
-def update_club_chart(selected_year, selected_x, selected_template, selected_dataset, global_ranges_QSO_WPX):     
+def update_club_chart(selected_y, selected_template, selected_dataset):     
     if isinstance(selected_dataset, list):
-        selected_dataset = pd.DataFrame(selected_dataset)
+        data_club = pd.DataFrame(selected_dataset)
+    else:
+        data_club= selected_dataset.copy()
 
-    selected_year = int(selected_year)
-    data_selected_year = selected_dataset[selected_dataset['Year'] == selected_year]
-
+    
     # Creazione un nuovo campo 'Club Status' per differenziare i membri di un club da quelli che non lo sono.
     # Viene utilizzato il metodo .loc per selezionare tutte le righe e viene creata la colonna 'Club Status'.
     # La funzione lambda controlla se il valore è 'No club' e restituisce 'No Club Member' in quel caso, altrimenti restituisce 'Club Member'.
-    data_selected_year.loc[:, 'Club Status'] = data_selected_year['Club'].apply(lambda x: 'No Club Member' if x == 'NO CLUB' else 'Club Member')
+    data_club.loc[:, 'Club Status'] = data_club['Club'].apply(lambda x: 'No Club Member' if x == 'NO CLUB' else 'Club Member')
 
-    x_min_QSO = global_ranges_QSO_WPX['x_min_QSO']
-    x_max_QSO = global_ranges_QSO_WPX['x_max_QSO']
-    y_min_QSO = global_ranges_QSO_WPX['y_min_QSO']
-    y_max_QSO = global_ranges_QSO_WPX['y_max_QSO']
-    x_min_WPX = global_ranges_QSO_WPX['x_min_WPX']
-    x_max_WPX = global_ranges_QSO_WPX['x_max_WPX']
-    y_min_WPX = global_ranges_QSO_WPX['y_min_WPX']
-    y_max_WPX = global_ranges_QSO_WPX['y_max_WPX']
-
+    # Aggregazione
+    data_club_grouped = (data_club.groupby(["Year", "Club Status"], as_index=False)[selected_y].mean())
+    
     # Colori personalizzati per l'istogramma dei club
     color_discrete_map = {
         'No Club Member': '#EF553B',
         'Club Member': '#636EFA'
     }
 
-    fig_club_chart = px.histogram(
-        data_selected_year,
-        x=selected_x,
-        y="Score",  
-        histfunc='avg',
-        color="Club Status",
-        title=f"Year: {selected_year}",
-        template= selected_template,            
-        color_discrete_map=color_discrete_map,            
-        category_orders={"Club Status": ['Club Member', 'No Club Member']}
-    )              
-    # Riscalamento degli assi 
-    if (selected_x == "QSOs"):
-        fig_club_chart.update_xaxes(range=[x_min_QSO, x_max_QSO])
-        fig_club_chart.update_yaxes(title='Mean of Score',range=[y_min_QSO, y_max_QSO])
-    
-    else:
-        fig_club_chart.update_xaxes(range=[x_min_WPX, x_max_WPX])
-        fig_club_chart.update_yaxes(title='Mean of Score', range=[y_min_WPX, y_max_WPX])
-
-    fig_club_chart.update_traces(
-        hovertemplate='<b>%{x}</b><br>Mean of Score: %{y}<br><extra></extra>'
-    )      
-        
+    fig_club_chart = px.line(
+        data_club_grouped,
+        x='Year',
+        y=selected_y,
+        color='Club Status',
+        title=f"Comparsion on {selected_y} for club members and not members",
+        labels={"Year": "Year"},
+        markers=True,
+        template=selected_template,
+        color_discrete_map=color_discrete_map
+    )        
     return fig_club_chart
 
 # Callback per popolare le opzioni del dropdown per la selezione dell'anno
@@ -941,10 +911,11 @@ def update_winner_country_chart(selected_country, y_data, selected_template, col
 # Callback per aggiornare il grafico a linee per le categorie
 @app.callback(
     Output("category-linechart", "figure"),
-    Input('selected-template', 'data'),
+    [Input('selected-template', 'data'),
+     Input('logarithmic-scale', 'value')],
     State('supercat', 'data')
 )
-def update_category_linechart(selected_template, supercat_count_per_year):
+def update_category_linechart(selected_template, logatithmic_scale, supercat_count_per_year):
     category_fig = px.line(
         supercat_count_per_year,
         x='Year',
@@ -956,7 +927,10 @@ def update_category_linechart(selected_template, supercat_count_per_year):
         template=selected_template,
         labels={'Count': 'Count', 'Category': 'Category', 'Year': 'Year'}
     )
-    category_fig.update_yaxes(type='log', title_text='Number of operators')
+    if logatithmic_scale:
+        category_fig.update_yaxes(type='log', title_text='Number of operators')
+    else:
+        category_fig.update_yaxes(title_text='Number of operators')
 
     return category_fig
 
