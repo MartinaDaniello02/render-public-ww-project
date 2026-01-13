@@ -517,7 +517,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
         ]),
         
         # rappresentazione dei club
-        dbc.Row(
+        dbc.Row([
             dbc.Col([
                 html.Div([
                     dbc.Label(
@@ -528,9 +528,12 @@ def single_data_dashboard_page(selected_dataset, title_string):
                     radio_club_x
                 ],style={"display": "flex", "alignItems": "center"}),
                 dcc.Graph(id="club-chart")
-            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'})
-        ),
-        #categorie di partecipazione, scegliere un grafico più bello magari
+            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
+            dbc.Col([
+                dcc.Graph(id='club-pie')
+            ], style={'max-width':1000, 'height':500, 'margin-top':'135px'})
+        ]),
+        #categorie di partecipazione
         dbc.Row(
             dbc.Col([
                 logarithmic_scale_switch,
@@ -671,7 +674,6 @@ def update_club_chart(selected_y, selected_template, selected_dataset):
         data_club = pd.DataFrame(selected_dataset)
     else:
         data_club= selected_dataset.copy()
-
     
     # Creazione un nuovo campo 'Club Status' per differenziare i membri di un club da quelli che non lo sono.
     # Viene utilizzato il metodo .loc per selezionare tutte le righe e viene creata la colonna 'Club Status'.
@@ -697,17 +699,42 @@ def update_club_chart(selected_y, selected_template, selected_dataset):
         markers=True,
         template=selected_template,
         color_discrete_map=color_discrete_map
-    )        
+    ).update_yaxes(title=f"Mean of {selected_y}")      
     return fig_club_chart
 
-# Callback per popolare le opzioni del dropdown per la selezione dell'anno
+# Callback per la generazione del grafico a torta per i club
 @app.callback(
-    Output("select-year", "options"),
-    [Input("select-year", "id"),
-    State("unique-years", "data")]
+    Output("club-pie", "figure"),   
+    Input('selected-template', 'data'),
+    State("selected-data", "data")    
 )
-def set_year_options(_, unique_years):
-    return [{'label': year, 'value': year} for year in unique_years]
+def update_club_pie(template, selected_data):
+    df = pd.DataFrame(selected_data)
+
+    df["Club Status"] = df["Club"].apply(
+        lambda x: "No Club Member" if x == "NO CLUB" else "Club Member"
+    )
+
+    df_pie = (
+        df
+        .groupby("Club Status")
+        .size()
+        .reset_index(name="Count")
+    )
+
+    fig = px.pie(
+        df_pie,
+        names="Club Status",
+        values="Count",
+        title="Club Members vs No Club Members from 2005 to 2024",
+        color="Club Status",
+        template=template,
+        color_discrete_map={
+            "Club Member": "#636EFA",
+            "No Club Member": "#EF553B"
+        }
+    )
+    return fig
 
 # Callback per la scelta del continente da visualizzare nella mappa
 @app.callback(
