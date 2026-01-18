@@ -507,7 +507,12 @@ def single_data_dashboard_page(selected_dataset, title_string):
                 ],style={"display": "flex", "alignItems": "center"}),                
                 dcc.Graph(id='winner-barchart')
             ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
-            dbc.Col([                
+            dbc.Col([     
+                dbc.Label(
+                    "Select winner:",
+                    html_for="winner-country-radio",
+                    style={'font-size':'20px', 'margin-right':'7px'}
+                ),           
                 radio_winner_countries,
                 ], style={'max-width':'180px', 'margin-top':'150px'}
             ),
@@ -523,7 +528,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
                     dbc.Label(
                         "Select y axis:",
                         html_for="select-club-y",
-                        style={'font-size':'20px', 'margin-right':'7px', 'margin-left':'30px'}
+                        style={'font-size':'20px', 'margin-right':'7px'}
                     ),
                     radio_club_x
                 ],style={"display": "flex", "alignItems": "center"}),
@@ -538,7 +543,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
             dbc.Col([
                 logarithmic_scale_switch,
                 dcc.Graph(id= 'category-linechart')
-            ], style={'max-width':1000, 'height':500, 'margin-top':'200px'})
+            ], style={'max-width':1000, 'height':500, 'margin-top':'90px'})
         ),
         # mappa del mondo
         dbc.Row([
