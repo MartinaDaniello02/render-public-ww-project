@@ -690,7 +690,7 @@ def update_club_chart(selected_y, selected_template, selected_dataset):
     
     # Colori personalizzati per l'istogramma dei club
     color_discrete_map = {
-        'No Club Member': '#EF553B',
+        'No Club Member': "#EFDA3B",
         'Club Member': '#636EFA'
     }
 
@@ -736,7 +736,7 @@ def update_club_pie(template, selected_data):
         template=template,
         color_discrete_map={
             "Club Member": "#636EFA",
-            "No Club Member": "#EF553B"
+            "No Club Member": "#EFDA3B"
         }
     )
     return fig
@@ -953,6 +953,7 @@ def update_winner_country_chart(selected_country, y_data, selected_template, col
         y=winners_selected_country[y_data],  
         mode='markers', 
         name='Winners',
+        line=dict(color="#FFFFFF"),
         text=winners_selected_country['Call'],
         hovertemplate=
         '<b>Year</b>: %{x}<br>' +
