@@ -1000,6 +1000,12 @@ def ssb_cw_dashboard_page(selected_dataset):
     mean_total_QSOs_CW = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'CW'], 'QSOs')
     mean_total_QSOs_SSB = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'SSB'], 'QSOs')
 
+    mean_total_WPX_CW = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'CW'], 'WPX')
+    mean_total_WPX_SSB = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'SSB'], 'WPX')
+
+    mean_total_score_CW = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'CW'], 'Score')
+    mean_total_score_SSB = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'SSB'], 'Score')
+
     for band in bands:
         mean_CW_df = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'CW'], band)
         mean_SSB_df = calculate_mean(selected_dataset[selected_dataset['Contest'] == 'SSB'], band)
@@ -1014,10 +1020,19 @@ def ssb_cw_dashboard_page(selected_dataset):
     mean_total_QSOs_CW.rename(columns={'QSOs': 'TotalQSOs_CW'}, inplace=True)
     mean_total_QSOs_SSB.rename(columns={'QSOs': 'TotalQSOs_SSB'}, inplace=True)
 
+    mean_total_WPX_CW.rename(columns={'WPX': 'TotalWPX_CW'}, inplace=True)
+    mean_total_WPX_SSB.rename(columns={'WPX': 'TotalWPX_SSB'}, inplace=True)
+
+    mean_total_score_CW.rename(columns={'Score': 'TotalScore_CW'}, inplace=True)
+    mean_total_score_SSB.rename(columns={'Score': 'TotalScore_SSB'}, inplace=True)
+
     merged_mean_df = pd.merge(merged_mean_df, mean_total_QSOs_CW, on='Year', how='left')
     merged_mean_df = pd.merge(merged_mean_df, mean_total_QSOs_SSB, on='Year', how='left')
+    merged_mean_df = pd.merge(merged_mean_df, mean_total_WPX_CW, on='Year', how='left')
+    merged_mean_df = pd.merge(merged_mean_df, mean_total_WPX_SSB, on='Year', how='left')
+    merged_mean_df = pd.merge(merged_mean_df, mean_total_score_CW, on='Year', how='left')
+    merged_mean_df = pd.merge(merged_mean_df, mean_total_score_SSB, on='Year', how='left')
 
-    
     # Conteggio dei partecipanti per ogni Country per il plot della mappa
     country_counts_cw = selected_dataset[selected_dataset['Contest'] == 'CW']['country_code'].value_counts().reset_index()
     country_counts_cw.columns = ['country_code', 'count']
@@ -1078,16 +1093,6 @@ def ssb_cw_dashboard_page(selected_dataset):
         inline=True
     )
 
-    #  Componente Dropdown per la selezione dell'anno nell'istogramma dei club
-    dropdown_years_comparsion = dcc.Dropdown(
-        id="select-year-comparsion-histogram",
-        className= "year-dropdown",
-        options=[],
-        value="2024",
-        style={'font-size': '20px'},
-        clearable= False,
-    )
-
     # Componente RadioItems per la selezione del continente da visualizzare nella mappa
     radio_comparsion_continents = dbc.RadioItems(
         id= "select-comparsion-continent",
@@ -1119,76 +1124,89 @@ def ssb_cw_dashboard_page(selected_dataset):
     )
 
     return dbc.Container([
-            dbc.Row([
-                dbc.Col([
-                    dbc.Col(html.H1('CQ World Wide WPX Contest  -'), style={'min-width':583,'margin-right':0}),
-                    dbc.Col(html.H3('Comparsion between SSB and CW contest data from 2005 to 2024'), style={'margin-top':13, 'min-width':1400,'text-align':'left'})
-                ], style={'display':'flex','text-align':'left'})                        
-            ], style={'margin-top':'50px'}),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Row([  
-                        dbc.Col([                 
-                            dbc.Row([                    
-                                dbc.Col([html.P("Select band:")], style={'max-width': '140px', 'font-size': '20px'}),
-                                dbc.Col(radio_comparsion_band, style={'max-width':'600px', 'font-size': '20px'})
-                            ], style={'margin-top':'10px'}),                        
-                            dbc.Row([
-                                dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
-                                dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
-                                dcc.Graph(id="band-comparsion"),
-                            ])
-                        ], style={'width':'820px'}),
-                        dbc.Col([
-                            dbc.Row([
-                                dcc.Store(id='unique-years', data=unique_years.tolist()),
-                                
-                                dbc.Col(html.P("Select year:"), style={'margin-top':'5px', 'font-size': '20px'}),
-                                dbc.Col(dropdown_years_comparsion),
-                        
-                                dbc.Col([html.P("Select x axis:")], style={'margin-top':'5px', 'margin-left':'25px', 'font-size': '20px'}),
-                                dbc.Col(radio_histogram_comparsion, style={'margin-top':'5px', 'min-width':'300px'})
-                                
-                            ]),                                
-                            dbc.Row([                                    
-                                dcc.Graph(id="histogram-comparsion")
-                            ])
-                        ], style={'width':'820px'})
-                    ],style={'margin-top': 10, 'width':'1650px'}),                    
-                    dbc.Row([
-                        dbc.Row([
-                            dbc.Col([html.P("Focus on:")], style={'width': '50px', 'margin-top':10, 'font-size': '20px'}),
-                            dbc.Col(radio_comparsion_continents, style={'width':'1100px'})
-                        ], style={'margin-top':'10px', 'width':'1200px'}),
-                        dbc.Row([                    
-                            dcc.Store(id='country-counts-ssb', data=country_counts_ssb.to_dict('records')),
-                            dcc.Store(id='country-counts-cw', data=country_counts_cw.to_dict('records')),
-                            dbc.Col([
-                                dcc.Graph(id='participants-map-graph'),
-                                dcc.Graph(id='winners-map-graph')
-                            ], style={'display':'flex', 'min-height': 1000})
-                        ])
-                    ],style={'width':'1650px'})
-                ], style={'max-width':'1670px'}),
-                dbc.Col([
-                    dbc.Row([                    
-                        dbc.Col([html.P("Select y axis:")], style={'max-width': '140px', 'font-size':'20px'}),
-                        dbc.Col(radio_comparsion_winner_axis, width = 'auto', style={'margin-left':0}),
-                        dcc.Store(id='y-data-to-plot-comparsion', data='Score'),
-                    ], style={'margin-top':'10px'}),
-                    dbc.Row([
-                        dcc.Store(id='winners-cw-table', data=winners_cw_table.to_dict('records')),
-                        dcc.Store(id='winners-ssb-table', data=winners_ssb_table.to_dict('records')),
-                        dcc.Store(id='select-winner-country-cw'),
-                        dcc.Store(id='select-winner-country-ssb'),
-                        dcc.Graph(id='winner-barchart-comparsion'),
-                        dcc.Graph(id='winner-linechart-comparsion'),
-                        dcc.Store(id='selected-year')
-                    ])
-                ], style={'max-width':'1000px'})
-            ], style={'display':'flex', 'min-width':'3000px'})            
-        ])
+        dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
+        dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
+        dcc.Store(id='unique-years', data=unique_years.tolist()),
+        dcc.Store(id='country-counts-ssb', data=country_counts_ssb.to_dict('records')),
+        dcc.Store(id='country-counts-cw', data=country_counts_cw.to_dict('records')),
+        dcc.Store(id='y-data-to-plot-comparsion', data='Score'),
+        dcc.Store(id='winners-cw-table', data=winners_cw_table.to_dict('records')),
+        dcc.Store(id='winners-ssb-table', data=winners_ssb_table.to_dict('records')),
+        dcc.Store(id='select-winner-country-cw'),
+        dcc.Store(id='select-winner-country-ssb'),
+        dcc.Store(id='selected-year'),
 
+
+        dbc.Row(
+            dbc.Col(
+                html.H3('Comparsion between SSB and CW contest data from 2005 to 2024')
+            )
+        ),
+        # Grafico a linee per le bande
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Select band:",
+                        html_for="select-comparsion-band",
+                        style={'font-size':'20px', 'margin-right':'7px'}
+                    ),
+                    radio_comparsion_band
+                ],style={"display": "flex", "alignItems": "center"}),                    
+                dcc.Graph(id="band-comparsion"),
+            ], style={'max-width':1000, 'height':500}),
+        ]),
+        # Grafici dei vincitori. Devono essere più indipendenti l'uno dall'altro
+        # Aggiungere radio button o selezione dell'anno, eliminare click sul grafico
+        dbc.Row([                    
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Select y axis:",
+                        html_for="select-y-barchart-comparsion",
+                        style={'font-size':'20px', 'margin-right':'7px'}
+                    ),
+                    radio_comparsion_winner_axis
+                ],style={"display": "flex", "alignItems": "center"}),                
+            ], style={'margin-top':'30px'})
+        ]),
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(id='winner-barchart-comparsion'),
+                dcc.Graph(id='winner-linechart-comparsion')
+            ],style={"display": "flex", "alignItems": "center"})                      
+        ]),
+        
+        # Grafico di comparazione dei punteggi o qso o wpx negli anni
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Select x axis:",
+                        html_for="select-histogram-x",
+                        style={'font-size':'20px', 'margin-right':'7px', 'margin-left':'20px'}
+                    ),
+                    radio_histogram_comparsion
+                ],style={"display": "flex", "alignItems": "center"})
+            ])            
+        ]),
+        dbc.Row([                                    
+            dcc.Graph(id="histogram-comparsion")
+        ]),
+
+        # Mappe
+        dbc.Row([
+            dbc.Col([html.P("Focus on:")], style={'width': '50px', 'margin-top':10, 'font-size': '20px'}),
+            dbc.Col(radio_comparsion_continents, style={'width':'1100px'})
+        ]),
+        dbc.Row([        
+            dbc.Col([
+                dcc.Graph(id='participants-map-graph', config={"scrollZoom": False}),
+                dcc.Graph(id='winners-map-graph', config={"scrollZoom": False})
+            ], style={'display':'flex', 'min-height': 1000})
+        ])
+    ], fluid=True)                   
+ 
 #################################################################
 # Tutte le callbacks e le funzioni per la dashboard di confronto
 #################################################################
@@ -1240,49 +1258,51 @@ def update_band_comparsion_line_chart(selected_band, selected_template, merged_m
 # Callback per aggiornare l'istogramma di confronto
 @app.callback(
     Output("histogram-comparsion", "figure"),
-    [Input("select-year-comparsion-histogram", "value"),
-    Input("select-histogram-x", "value"),
+    [Input("select-histogram-x", "value"),
     Input('selected-template', 'data')],
-    State("selected-data", "data")    
+    State("merged-mean-data", "data")
 )
-def update_histogram_comparsion(selected_year, selected_x, selected_template, selected_dataset):     
-    if isinstance(selected_dataset, list):
-        selected_dataset = pd.DataFrame(selected_dataset)
+def update_histogram_comparsion(selected_y, selected_template, merged_mean_data):     
+    
+    merged_mean_df = pd.DataFrame(merged_mean_data)
+    selected_cw_data = f"{selected_y}_CW"
 
-    selected_year = int(selected_year)
-    data_selected_year = selected_dataset[selected_dataset['Year'] == selected_year]
+    fig_score_chart = go.Figure()
+
+    fig_score_chart.add_trace(go.Scatter(
+        x=merged_mean_df['Year'],
+        y=merged_mean_df[selected_cw_data],
+        mode='lines+markers',
+        name='CW',
+        line=dict(color='#31AFE0')
+    ))
+
+
+
+    # Media del punteggio per anno e contest
+    selected_dataset = (
+        selected_dataset
+        .groupby(["Year", "Contest"], as_index=False)["Score"]
+        .mean()
+    )
 
     color_discrete_map = {
         'CW': '#31AFE0',
         'SSB': 'darkorange'
     }
-    comparsion_histogram = px.histogram(
-        data_selected_year,
-        x=selected_x,
-        y="Score",  
-        histfunc='avg',
-        color="Contest",
-        height=490,
-        width= 800,
-        title=f"Year: {selected_year}",
-        template= selected_template,            
-        color_discrete_map=color_discrete_map,            
-        category_orders={"Contest": ['CW', 'SSB']}
-    )            
-    comparsion_histogram.update_traces(
-        hovertemplate='<b>%{x}</b><br>Mean of Score: %{y}<br><extra></extra>'
-    )                
-    return comparsion_histogram
-
-
-# Callback per popolare le opzioni del dropdown per la selezione dell'anno
-@app.callback(
-    Output("select-year-comparsion-histogram", "options"),
-    [Input("select-year-comparsion-histogram", "id"),
-    State("unique-years", "data")]
-)
-def set_year_options(_, unique_years):
-    return [{'label': year, 'value': year} for year in unique_years]
+   
+    fig = px.line(
+        selected_dataset,
+        x='Year',
+        y='Score',
+        color="Score",
+        markers=True,
+        labels={"Year": "Year"},
+        title="Mean Score comparison",
+        template=selected_template,
+        color_discrete_map=color_discrete_map
+    ).update_yaxes(title=f"Mean of {selected_y}")
+    return fig_score_chart
 
 
 # Callback per le mappe geografiche

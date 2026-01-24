@@ -4,11 +4,8 @@
 
 - aggiornare la welcome page
 
-- rivedere la struttura dal progetto, lavorare su una dashboard alla volta
-
 - mettere uno sfondo grigetto per la visuallizzazione light
 
-- mettere colore testo nelle label con più contrasto
 --------------------------------------------
 
 . la navbar deve avere la stessa lunghezza di tutta la pagina
@@ -18,7 +15,6 @@
 
 . aggiungere un grafico per le ore lavorate
 
-. su render la mappa è estremamente lenta
 
 ---------------------------------------------------
 
@@ -35,15 +31,6 @@
 
 ------------------------------------------
 
-grafico per i club:
-
-    club o no club -> mostrare la media dei punteggi o dei wpx a confronto in un linechar
-    top 10 clubs -> punteggio qso oppure wpx in linechart
-        scelta 10, 50, 100 clubs migliori?
-
-grafico per le categorie:
-    implementare barra di ricerca e mostrare i risultati per quella categoria
----------------------------------------------
 ideona: nella homepage implementare barra di ricerca per nominativo
 mostare i risultati per quello specifico nominativo, le statistiche relative a lui
 
