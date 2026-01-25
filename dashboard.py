@@ -1081,14 +1081,14 @@ def ssb_cw_dashboard_page(selected_dataset):
         inline = True
     )
 
-    # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse x dell'istogramma dei club
-    radio_histogram_comparsion = dbc.RadioItems(
-        id="select-histogram-x",
+    # Componente RadioItems per la selezione del tipo di dato da visualizzare sull'asse y del linechart dei qso wpx
+    radio_qso_wpx_comparsion = dbc.RadioItems(
+        id="select-line-qso-wpx-y",
         options=[        
-            {"label": "WPX", "value": "WPX"},
-            {"label": "QSOs", "value": "QSOs"}
+            {"label": "WPX", "value": "TotalWPX"},
+            {"label": "QSOs", "value": "TotalQSOs"}
         ],
-        value="WPX",
+        value="TotalWPX",
         style={'font-size': '20px'},
         inline=True
     )
@@ -1136,7 +1136,6 @@ def ssb_cw_dashboard_page(selected_dataset):
         dcc.Store(id='select-winner-country-ssb'),
         dcc.Store(id='selected-year'),
 
-
         dbc.Row(
             dbc.Col(
                 html.H3('Comparsion between SSB and CW contest data from 2005 to 2024')
@@ -1155,44 +1154,51 @@ def ssb_cw_dashboard_page(selected_dataset):
                 ],style={"display": "flex", "alignItems": "center"}),                    
                 dcc.Graph(id="band-comparsion"),
             ], style={'max-width':1000, 'height':500}),
+            # Inserire un grafico a torta che idica quali sono le bande in cui si sono fatti più qso
         ]),
-        # Grafici dei vincitori. Devono essere più indipendenti l'uno dall'altro
-        # Aggiungere radio button o selezione dell'anno, eliminare click sul grafico
-        dbc.Row([                    
+        
+        dbc.Row([
+            # Grafico a linee per la media dei punteggi
+            dbc.Col([                
+                dcc.Graph(id="score-comparsion")
+            ], style={'max-width':1000, 'height':500, 'margin-top':'70px'}),
+            # Grafico a linee per le medie dei WPX o dei QSO a seconda della selezione
             dbc.Col([
                 html.Div([
                     dbc.Label(
                         "Select y axis:",
-                        html_for="select-y-barchart-comparsion",
-                        style={'font-size':'20px', 'margin-right':'7px'}
-                    ),
-                    radio_comparsion_winner_axis
-                ],style={"display": "flex", "alignItems": "center"}),                
-            ], style={'margin-top':'30px'})
-        ]),
-        dbc.Row([
-            dbc.Col([
-                dcc.Graph(id='winner-barchart-comparsion'),
-                dcc.Graph(id='winner-linechart-comparsion')
-            ],style={"display": "flex", "alignItems": "center"})                      
-        ]),
-        
-        # Grafico di comparazione dei punteggi o qso o wpx negli anni
-        dbc.Row([
-            dbc.Col([
-                html.Div([
-                    dbc.Label(
-                        "Select x axis:",
-                        html_for="select-histogram-x",
+                        html_for="selectline-qso-wpx-y",
                         style={'font-size':'20px', 'margin-right':'7px', 'margin-left':'20px'}
                     ),
-                    radio_histogram_comparsion
-                ],style={"display": "flex", "alignItems": "center"})
-            ])            
-        ]),
-        dbc.Row([                                    
-            dcc.Graph(id="histogram-comparsion")
-        ]),
+                    radio_qso_wpx_comparsion
+                ],style={"display": "flex", "alignItems": "center"}),
+                dcc.Graph(id="qso-wpx-comparsion")
+            ], style={'max-width':1000, 'height':500, 'margin-top':'30px'})            
+        ]),  
+
+        # Grafici dei vincitori. Devono essere più indipendenti l'uno dall'altro
+        # Aggiungere radio button o selezione dell'anno, eliminare click sul grafico
+        # dbc.Row([                    
+        #     dbc.Col([
+        #         html.Div([
+        #             dbc.Label(
+        #                 "Select y axis:",
+        #                 html_for="select-y-barchart-comparsion",
+        #                 style={'font-size':'20px', 'margin-right':'7px'}
+        #             ),
+        #             radio_comparsion_winner_axis
+        #         ],style={"display": "flex", "alignItems": "center"}),                
+        #     ], style={'margin-top':'30px'})
+        # ]),
+        # dbc.Row([
+        #     dbc.Col([
+        #         dcc.Graph(id='winner-barchart-comparsion'),
+        #         dcc.Graph(id='winner-linechart-comparsion')
+        #     ],style={"display": "flex", "alignItems": "center"})                      
+        # ]),
+        
+        # Grafico di comparazione dei punteggi o qso o wpx negli anni
+        
 
         # Mappe
         dbc.Row([
@@ -1246,63 +1252,83 @@ def update_band_comparsion_line_chart(selected_band, selected_template, merged_m
         title=f"Comparison of number of QSOs between SSB and CW contest in {selected_band} band",
         xaxis_title='Year',
         yaxis_title='Mean of QSOs',
-        template= selected_template,
-        yaxis=dict(range=[0, 700]),        
-        height=490,
-        width = 800
+        template= selected_template
     )
 
     return fig_band_comparsion_line_chart
 
 
-# Callback per aggiornare l'istogramma di confronto
+# Callback per il linechart per il punteggio medio negli anni
 @app.callback(
-    Output("histogram-comparsion", "figure"),
-    [Input("select-histogram-x", "value"),
-    Input('selected-template', 'data')],
+    Output("score-comparsion", "figure"),    
+    Input('selected-template', 'data'),
     State("merged-mean-data", "data")
 )
-def update_histogram_comparsion(selected_y, selected_template, merged_mean_data):     
-    
+def update_score_comparsion(selected_template, merged_mean_data):        
     merged_mean_df = pd.DataFrame(merged_mean_data)
-    selected_cw_data = f"{selected_y}_CW"
-
     fig_score_chart = go.Figure()
-
     fig_score_chart.add_trace(go.Scatter(
         x=merged_mean_df['Year'],
-        y=merged_mean_df[selected_cw_data],
+        y=merged_mean_df['TotalScore_CW'],
         mode='lines+markers',
         name='CW',
         line=dict(color='#31AFE0')
     ))
-
-
-
-    # Media del punteggio per anno e contest
-    selected_dataset = (
-        selected_dataset
-        .groupby(["Year", "Contest"], as_index=False)["Score"]
-        .mean()
+    fig_score_chart.add_trace(go.Scatter(
+        x=merged_mean_df['Year'],
+        y=merged_mean_df['TotalScore_SSB'],
+        mode='lines+markers',
+        name='SSB',
+        line=dict(color='darkorange')
+    ))
+    fig_score_chart.update_layout(
+        title=f"Comparison of mean Score between SSB and CW contest",
+        xaxis_title='Year',
+        yaxis_title='Mean of Score',
+        template= selected_template
     )
-
-    color_discrete_map = {
-        'CW': '#31AFE0',
-        'SSB': 'darkorange'
-    }
-   
-    fig = px.line(
-        selected_dataset,
-        x='Year',
-        y='Score',
-        color="Score",
-        markers=True,
-        labels={"Year": "Year"},
-        title="Mean Score comparison",
-        template=selected_template,
-        color_discrete_map=color_discrete_map
-    ).update_yaxes(title=f"Mean of {selected_y}")
     return fig_score_chart
+
+# Callback per il linechart per i wpx o qso medi negli anni
+@app.callback(
+    Output("qso-wpx-comparsion", "figure"),    
+    [Input('selected-template', 'data'), 
+     Input('select-line-qso-wpx-y', 'value')],
+    State("merged-mean-data", "data")
+)
+def update_score_comparsion(selected_template, selected_y, merged_mean_data):        
+    merged_mean_df = pd.DataFrame(merged_mean_data)
+
+    fig_line_chart = go.Figure()
+    y_cw = f'{selected_y}_CW'
+    y_ssb = f'{selected_y}_SSB'
+
+    fig_line_chart.add_trace(go.Scatter(
+        x=merged_mean_df['Year'],
+        y=merged_mean_df[y_cw],
+        mode='lines+markers',
+        name='CW',
+        line=dict(color='#31AFE0')
+    ))
+    fig_line_chart.add_trace(go.Scatter(
+        x=merged_mean_df['Year'],
+        y=merged_mean_df[y_ssb],
+        mode='lines+markers',
+        name='SSB',
+        line=dict(color='darkorange')
+    ))
+    if selected_y == 'TotalQSOs':
+        mean_label = 'QSOs'
+    else:
+        mean_label = 'WPX'
+
+    fig_line_chart.update_layout(
+        title=f"Comparison of mean {mean_label} between SSB and CW contest",
+        xaxis_title='Year',
+        yaxis_title=f"Mean of {mean_label}",
+        template= selected_template
+    )
+    return fig_line_chart
 
 
 # Callback per le mappe geografiche
