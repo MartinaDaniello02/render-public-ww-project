@@ -1123,19 +1123,15 @@ def ssb_cw_dashboard_page(selected_dataset):
         style={'font-size': '20px'},
         inline = True
     )
-
+    
     return dbc.Container([
         dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
         dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
         dcc.Store(id='unique-years', data=unique_years.tolist()),
         dcc.Store(id='country-counts-ssb', data=country_counts_ssb.to_dict('records')),
         dcc.Store(id='country-counts-cw', data=country_counts_cw.to_dict('records')),
-        dcc.Store(id='y-data-to-plot-comparsion', data='Score'),
         dcc.Store(id='winners-cw-table', data=winners_cw_table.to_dict('records')),
         dcc.Store(id='winners-ssb-table', data=winners_ssb_table.to_dict('records')),
-        dcc.Store(id='select-winner-country-cw'),
-        dcc.Store(id='select-winner-country-ssb'),
-        dcc.Store(id='selected-year'),
 
         dbc.Row(
             dbc.Col(
@@ -1160,7 +1156,7 @@ def ssb_cw_dashboard_page(selected_dataset):
                 dcc.Graph(id = 'ssb-pie', style={'max-width':500, 'height':500})
             ],style={"display": "flex", "alignItems": "center"}),
         ]),
-        
+        # Grafico di comparazione dei punteggi o qso o wpx negli anni
         dbc.Row([
             # Grafico a linee per la media dei punteggi
             dbc.Col([                
@@ -1178,36 +1174,38 @@ def ssb_cw_dashboard_page(selected_dataset):
                 ],style={"display": "flex", "alignItems": "center"}),
                 dcc.Graph(id="qso-wpx-comparsion")
             ], style={'max-width':1000, 'height':500, 'margin-top':'30px'})            
-        ]),  
-
+        ]), 
         # Grafici dei vincitori. Devono essere più indipendenti l'uno dall'altro
         # Aggiungere radio button o selezione dell'anno, eliminare click sul grafico
-        # dbc.Row([                    
-        #     dbc.Col([
-        #         html.Div([
-        #             dbc.Label(
-        #                 "Select y axis:",
-        #                 html_for="select-y-barchart-comparsion",
-        #                 style={'font-size':'20px', 'margin-right':'7px'}
-        #             ),
-        #             radio_comparsion_winner_axis
-        #         ],style={"display": "flex", "alignItems": "center"}),                
-        #     ], style={'margin-top':'30px'})
-        # ]),
-        # dbc.Row([
-        #     dbc.Col([
-        #         dcc.Graph(id='winner-barchart-comparsion'),
-        #         dcc.Graph(id='winner-linechart-comparsion')
-        #     ],style={"display": "flex", "alignItems": "center"})                      
-        # ]),
-        
-        # Grafico di comparazione dei punteggi o qso o wpx negli anni
-        
-
+        dbc.Row([                    
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Select y axis:",
+                        html_for="select-y-barchart-comparsion",
+                        style={'font-size':'20px', 'margin-right':'7px'}
+                    ),
+                    radio_comparsion_winner_axis
+                ],style={"display": "flex", "alignItems": "center"}),                
+            ], style={'margin-top':'30px'})
+        ]),
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(id='winner-barchart-comparsion')
+            ],style={"display": "flex", "alignItems": "center"})                      
+        ]),
         # Mappe
         dbc.Row([
-            dbc.Col([html.P("Focus on:")], style={'width': '50px', 'margin-top':10, 'font-size': '20px'}),
-            dbc.Col(radio_comparsion_continents, style={'width':'1100px'})
+            dbc.Col([
+                html.Div([
+                    dbc.Label(
+                        "Focus on:",
+                        html_for="select-comparsion-continent",
+                        style={'font-size':'20px', 'margin-right':'15px', 'margin-left':'20px', 'margin-top':'5px'}
+                    ),
+                    radio_comparsion_continents
+                ],style={"display": "flex", "alignItems": "center"}),
+            ],style={"margin-top": "50px"}),
         ]),
         dbc.Row([        
             dbc.Col([
@@ -1525,28 +1523,15 @@ def update_comparsion_map(selected_continent, selected_template, country_counts_
     )
     return map_figure_participants, map_figure_winners
 
-# Callback per aggiornare i due grafici sui vincitori in base alla scelta del dato da usare sull'asse y
-@app.callback(
-    Output("y-data-to-plot-comparsion", "data"),
-    Input("select-y-barchart-comparsion", "value")    
-)
-def update_winner_comparsion_plots(selected_y):
-    if selected_y == "WPX":
-        y_data_to_plot = "WPX"
-    elif selected_y == "QSOs":
-        y_data_to_plot = "QSOs"
-    else:
-        y_data_to_plot = "Score"
-    return y_data_to_plot    
-
+# Callback per il grafico a barre dei vincitori
 @app.callback(
     Output("winner-barchart-comparsion", "figure"),
-    [Input("y-data-to-plot-comparsion", "data"),
-      Input('selected-template', 'data')],
+    [Input('selected-template', 'data'),
+      Input('select-y-barchart-comparsion', 'value')],
     [State('winners-cw-table', 'data'),
      State('winners-ssb-table', 'data')]
 )
-def update_winner_comparsion_barchart(selected_y, selected_template, winners_cw_table, winners_ssb_table):    
+def update_winner_comparsion_barchart(selected_template, selected_y, winners_cw_table, winners_ssb_table):    
     if isinstance(winners_cw_table, list):
         winners_cw_table = pd.DataFrame(winners_cw_table)
     if isinstance(winners_ssb_table, list):
@@ -1600,141 +1585,6 @@ def update_winner_comparsion_barchart(selected_y, selected_template, winners_cw_
     )
 
     return winner_barchart
-
-# Callback per il click sul barchart dei vincitori
-@app.callback(
-    [Output('select-winner-country-cw', 'data'),
-    Output('select-winner-country-ssb', 'data'),
-    Output('selected-year', 'data')],
-    [Input('winner-barchart-comparsion', 'clickData'),
-     State('winners-cw-table', 'data'),
-     State('winners-ssb-table', 'data')]
-)
-def update_selected_country_comparsion(clickData, winners_cw_table, winners_ssb_table):
-    if isinstance(winners_cw_table, list):
-        winners_cw_table = pd.DataFrame(winners_cw_table)
-    if isinstance(winners_ssb_table, list):
-        winners_ssb_table = pd.DataFrame(winners_ssb_table)
-    if clickData:
-        selected_year = clickData['points'][0]['x']
-        selected_country_cw = winners_cw_table.loc[winners_cw_table['Year'] == selected_year, 'Country'].values[0]
-        selected_country_ssb = winners_ssb_table.loc[winners_ssb_table['Year'] == selected_year, 'Country'].values[0]
-        return selected_country_cw, selected_country_ssb, selected_year
-    else:
-        raise PreventUpdate
-
-# Callback per aggiornare il grafico a linee in base alla scelta del paese (tramite il click sul barchart)
-@app.callback(
-    Output("winner-linechart-comparsion", "figure"),
-    [Input("select-winner-country-cw", "data"),
-     Input('select-winner-country-ssb', 'data'),
-     Input("y-data-to-plot-comparsion", "data"),
-     Input('selected-template', 'data')],
-    [State('selected-data', 'data'),
-     State('winners-cw-table', 'data'),
-     State('winners-ssb-table', 'data'),
-     State('selected-year', 'data')]         
-)
-def update_winner_country_chart(selected_country_cw, selected_country_ssb, y_data, selected_template, selected_dataset, winners_cw_table, winners_ssb_table, selected_year):
-    if isinstance(selected_dataset, list):
-        selected_dataset = pd.DataFrame(selected_dataset)
-    if isinstance(winners_cw_table, list):
-        winners_cw_table = pd.DataFrame(winners_cw_table)
-    if isinstance(winners_ssb_table, list):
-        winners_ssb_table = pd.DataFrame(winners_ssb_table)
-
-    default_country_cw = winners_cw_table.loc[winners_cw_table['Year'] == 2005, 'Country'].values[0]
-    default_country_ssb = winners_ssb_table.loc[winners_ssb_table['Year'] == 2005, 'Country'].values[0]
-
-    if selected_year:
-        year_to_plot = selected_year
-    else:
-        year_to_plot = '2005'
-
-    if selected_country_cw:        
-        country_to_plot_cw = selected_country_cw
-    else:        
-        country_to_plot_cw = default_country_cw
-
-    if selected_country_ssb:
-        country_to_plot_ssb = selected_country_ssb
-    else:
-        country_to_plot_ssb = default_country_ssb  
-    
-    mean_score_cw = calculate_mean_data_for_country(selected_dataset, country_to_plot_cw, y_data)
-    mean_score_ssb = calculate_mean_data_for_country(selected_dataset, country_to_plot_ssb, y_data)
-    
-    winner_linechart = go.Figure()
-
-    if country_to_plot_cw == country_to_plot_ssb:
-        winner_linechart.add_trace(
-            go.Scatter(
-                x=mean_score_cw['Year'],  # Che equivale in questo caso a mean_score_ssb['Year']
-                y=mean_score_cw[y_data],  # Che equivale in questo caso a mean_score_ssb[y_data]
-                mode='lines+markers',
-                name=f'{country_to_plot_cw} (CW + SSB)',
-                line=dict(color='#FF00B7'),
-                marker=dict(size=8),
-                hovertemplate="<b>Country: </b> " + country_to_plot_cw + "<br><b>Year: </b> %{x}<br><b>Mean of " + y_data +": </b> %{y}<extra></extra>",
-                showlegend=True
-            )
-        )
-    else:
-        winner_linechart.add_trace(
-            go.Scatter(
-                x=mean_score_cw['Year'],
-                y=mean_score_cw[y_data],
-                mode='lines+markers',  
-                name=f'{country_to_plot_cw} (CW)',
-                line=dict(color='#31AFE0'),
-                marker=dict(size=8),
-                hovertemplate="<b>Country: </b>" + country_to_plot_cw +"<br><b>Year: </b> %{x}<br><b>Mean of " + y_data +": </b> %{y}<extra></extra>"  
-            )
-        )
-        winner_linechart.add_trace(
-            go.Scatter(
-                x=mean_score_ssb['Year'],
-                y=mean_score_ssb[y_data], 
-                mode='lines+markers',
-                name=f'{country_to_plot_ssb} (SSB)', 
-                line=dict(color='orange'),
-                marker=dict(size=8),
-                hovertemplate="<b>Country: </b>" + country_to_plot_ssb +"<br><b>Year:</b> %{x}<br><b>Mean of " + y_data +": </b> %{y}<extra></extra>"
-            )
-        )  
-
-    winners_selected_country_cw = winners_cw_table[winners_cw_table['Country'] == country_to_plot_cw]
-    winner_linechart.add_scatter(    
-        x=winners_selected_country_cw['Year'],  
-        y=winners_selected_country_cw[y_data],  
-        mode='markers', 
-        name='CW winners',
-        marker=dict(color='#31AFE0'),
-        text=winners_selected_country_cw['Call'],
-        hovertemplate= '<b>Year</b>: %{x}<br><b>Call</b>: %{text}<br><b>Country: </b>' + country_to_plot_cw +'<br><b>' + y_data +': </b> %{y}'
-    )        
-    winners_selected_country_ssb = winners_ssb_table[winners_ssb_table['Country'] == country_to_plot_ssb]
-    winner_linechart.add_scatter(    
-        x=winners_selected_country_ssb['Year'],  
-        y=winners_selected_country_ssb[y_data],  
-        mode='markers',
-        marker=dict(color='orange'),
-        name='SSB winners',
-        text=winners_selected_country_ssb['Call'],
-        hovertemplate= '<b>Year</b>: %{x}<br><b>Call</b>: %{text}<br><b>Country: </b>' + country_to_plot_ssb +'<br><b>' + y_data +': </b> %{y}'
-    )
-    winner_linechart.update_layout(
-        template= selected_template,
-        title= f"Mean data for {year_to_plot} winners (click a bar in the plot above to see details)",
-        height=590,
-        width=850,
-        xaxis_title="Year",
-        yaxis_title='Mean of '+ y_data,
-        margin=dict(l=2, r=2, t=50, b=100)
-    )
-
-    return winner_linechart
-
 
 ##################################################################
 # Callback per gestire la selezione del dataset e la navigazione alla dashboard
