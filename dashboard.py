@@ -437,7 +437,6 @@ def single_data_dashboard_page(selected_dataset, title_string):
 
     return dbc.Container([
         dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
-        dcc.Store(id='unique-years', data=unique_years.tolist()),        
         dcc.Store(id='country-counts',data=country_counts.to_dict('records')),
         dcc.Store(id='winner-counts', data = winner_counts.to_dict('records')),
         dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
@@ -1127,7 +1126,6 @@ def ssb_cw_dashboard_page(selected_dataset):
     return dbc.Container([
         dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
         dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
-        dcc.Store(id='unique-years', data=unique_years.tolist()),
         dcc.Store(id='country-counts-ssb', data=country_counts_ssb.to_dict('records')),
         dcc.Store(id='country-counts-cw', data=country_counts_cw.to_dict('records')),
         dcc.Store(id='winners-cw-table', data=winners_cw_table.to_dict('records')),
@@ -1191,7 +1189,8 @@ def ssb_cw_dashboard_page(selected_dataset):
         ]),
         dbc.Row([
             dbc.Col([
-                dcc.Graph(id='winner-barchart-comparsion')
+                dcc.Graph(id='winner-barchart-comparsion'),
+                dcc.Graph(id='winner-radar')
             ],style={"display": "flex", "alignItems": "center"})                      
         ]),
         # Mappe
@@ -1282,7 +1281,8 @@ def update_cw_pie(template, data):
         names=labels,
         values=values,
         title="Band activity comparsion in CW contest",
-        template=template
+        template=template,
+        color_discrete_sequence=px.colors.qualitative.Vivid
     ).update_traces(
         hovertemplate=
         "Band: %{label}<br>"
@@ -1313,7 +1313,8 @@ def update_ssb_pie(template, data):
         names=labels,
         values=values,
         title="Band activity comparsion in SSB contest",
-        template=template
+        template=template,
+        color_discrete_sequence=px.colors.qualitative.Vivid
     ).update_traces(
         hovertemplate=
         "Band: %{label}<br>"
@@ -1585,6 +1586,58 @@ def update_winner_comparsion_barchart(selected_template, selected_y, winners_cw_
     )
 
     return winner_barchart
+
+# Radar chart vincitori
+@app.callback(
+    Output('winner-radar', 'figure'),
+    Input('selected-template', 'data'),
+    [ State('winners-cw-table', 'data'),
+    State('winners-ssb-table', 'data')]
+)
+def update_radar_chart(selected_template, winners_cw_table, winners_ssb_table):
+    if isinstance(winners_cw_table, list):
+        winners_cw_table = pd.DataFrame(winners_cw_table)
+    if isinstance(winners_ssb_table, list):
+        winners_ssb_table = pd.DataFrame(winners_ssb_table)
+
+    cw_color = '#31AFE0'
+    ssb_color = 'orange'
+
+    cw_band_profile = winners_cw_table[bands].mean()
+    ssb_band_profile = winners_ssb_table[bands].mean()
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatterpolar(
+            r=cw_band_profile.values,
+            theta=bands,
+            fill='toself',
+            name='CW Winners',
+            line=dict(color=cw_color)
+        )
+    )
+
+    fig.add_trace(
+        go.Scatterpolar(
+            r=ssb_band_profile.values,
+            theta=bands,
+            fill='toself',
+            name='SSB Winners',
+            line=dict(color=ssb_color)
+        )
+    )
+
+    fig.update_layout(
+        title="Band activity profile of contest winners (mean of QSOs per band)",
+        polar=dict(
+            radialaxis=dict(visible=True)
+        ),
+        template = selected_template,
+        showlegend=True
+    )
+
+    return fig
+
 
 ##################################################################
 # Callback per gestire la selezione del dataset e la navigazione alla dashboard
