@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 import os
 import dash_bootstrap_components as dbc
 from dash import dash, html, dcc, State, Input, Output, callback_context
@@ -118,7 +119,13 @@ def find_country_from_code(code, selected_dataset):
     country_row = selected_dataset[selected_dataset["country_code"] == code]
     return country_row["Country"].values[0] if not country_row.empty else None
 
-
+# Template personalizzato per il tema chiaro
+pio.templates["plotly_light_soft"] = pio.templates["plotly_white"].update(
+    layout=dict(
+        paper_bgcolor="#b0b5ba",
+        plot_bgcolor="#b0b5ba"
+    )
+)
 
 ############################################################
 
@@ -188,7 +195,7 @@ def go_home(n_clicks):
 )
 def update_theme_store(dark_mode):
     theme_data = {'dark_mode': dark_mode}
-    template = 'plotly_dark' if dark_mode else 'plotly_white'
+    template = 'plotly_dark' if dark_mode else 'plotly_light_soft'
     return theme_data, template
 
 # Callback che aggiorna il tema

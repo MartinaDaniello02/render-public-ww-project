@@ -1,13 +1,11 @@
 body {
-  background-color: white;
+  background-color: #d3d3d3;
   color: black;
-  width: 3000px;
 }
 
 .navbar{
-  background-color: white !important;
+  background-color: #d3d3d3 !important;
   color: black !important;
-  width: 1450px !important;  
   text-align: left;
 }
 
@@ -15,8 +13,8 @@ body {
   height: 100px;
   width: 300px;
   font-size: 28px;
-  background-color: lightgray !important;
-  border-color: lightgray;
+  background-color: #7e8891 !important;
+  border-color: #7e8891;
   color: black !important;
 }
 
@@ -27,8 +25,8 @@ body {
   margin-top: 20px;
   margin-left: 0px;
   
-  background-color: lightgray !important;
-  border-color: lightgray;
+  background-color: #7e8891 !important;
+  border-color: #7e8891;
   color: black !important;
 }
   
@@ -40,19 +38,5 @@ body {
   font-size: 26px;
   justify-content: center;    
   background-color: lightgray;
-  color: black;
-}
-
-.year-dropdown {
-  width: 100px;
-  margin-top: 10px;
-  margin-bottom: 6px;
-}
-.year-dropdown .Select-menu-outer {
-  background-color: white;
-  color: black;
-}
-.year-dropdown .Select-option {
-  background-color: white;
   color: black;
 }
