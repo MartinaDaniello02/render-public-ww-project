@@ -102,6 +102,7 @@ def get_continent_bounds(continent):
     }
     return bounds.get(continent, bounds['World'])
 
+# Array che definisce le bande del contest
 bands = ['160M', '80M', '40M', '20M', '15M', '10M']
 
 # Funzione che restituisce il nome del Country dato il codice
@@ -1154,7 +1155,10 @@ def ssb_cw_dashboard_page(selected_dataset):
                 ],style={"display": "flex", "alignItems": "center"}),                    
                 dcc.Graph(id="band-comparsion"),
             ], style={'max-width':1000, 'height':500}),
-            # Inserire un grafico a torta che idica quali sono le bande in cui si sono fatti più qso
+            dbc.Col([
+                dcc.Graph(id = 'cw-pie', style={'max-width':500, 'height':500}),
+                dcc.Graph(id = 'ssb-pie', style={'max-width':500, 'height':500})
+            ],style={"display": "flex", "alignItems": "center"}),
         ]),
         
         dbc.Row([
@@ -1217,6 +1221,7 @@ def ssb_cw_dashboard_page(selected_dataset):
 # Tutte le callbacks e le funzioni per la dashboard di confronto
 #################################################################
 
+# Callback per il linechart delle bande
 @app.callback(
     Output("band-comparsion", "figure"),
     [Input("select-comparsion-band", "value"),
@@ -1257,6 +1262,67 @@ def update_band_comparsion_line_chart(selected_band, selected_template, merged_m
 
     return fig_band_comparsion_line_chart
 
+# Callback per il pie del contest cw
+@app.callback(
+    Output("cw-pie", "figure"),   
+    Input('selected-template', 'data'),
+    State("merged-mean-data", "data")    
+)
+def update_cw_pie(template, data):
+    df = pd.DataFrame(data)
+
+    values = []
+    labels = []
+
+    for band in bands:
+        col = f"{band}_CW"
+        if col in df.columns:
+            values.append(df[col].sum())
+            labels.append(band)
+
+    fig = px.pie(
+        names=labels,
+        values=values,
+        title="Band activity comparsion in CW contest",
+        template=template
+    ).update_traces(
+        hovertemplate=
+        "Band: %{label}<br>"
+        "QSOs: %{value}<extra></extra>"
+    )
+
+    return fig
+
+# Callback per il pie del contest ssb
+@app.callback(
+    Output("ssb-pie", "figure"),   
+    Input('selected-template', 'data'),
+    State("merged-mean-data", "data")    
+)
+def update_ssb_pie(template, data):
+    df = pd.DataFrame(data)
+
+    values = []
+    labels = []
+
+    for band in bands:
+        col = f"{band}_SSB"
+        if col in df.columns:
+            values.append(df[col].sum())
+            labels.append(band)
+
+    fig = px.pie(
+        names=labels,
+        values=values,
+        title="Band activity comparsion in SSB contest",
+        template=template
+    ).update_traces(
+        hovertemplate=
+        "Band: %{label}<br>"
+        "QSOs: %{value}<extra></extra>"
+    )
+
+    return fig
 
 # Callback per il linechart per il punteggio medio negli anni
 @app.callback(
@@ -1329,7 +1395,6 @@ def update_score_comparsion(selected_template, selected_y, merged_mean_data):
         template= selected_template
     )
     return fig_line_chart
-
 
 # Callback per le mappe geografiche
 @app.callback(
@@ -1460,7 +1525,6 @@ def update_comparsion_map(selected_continent, selected_template, country_counts_
     )
     return map_figure_participants, map_figure_winners
 
-
 # Callback per aggiornare i due grafici sui vincitori in base alla scelta del dato da usare sull'asse y
 @app.callback(
     Output("y-data-to-plot-comparsion", "data"),
@@ -1474,7 +1538,6 @@ def update_winner_comparsion_plots(selected_y):
     else:
         y_data_to_plot = "Score"
     return y_data_to_plot    
-
 
 @app.callback(
     Output("winner-barchart-comparsion", "figure"),
