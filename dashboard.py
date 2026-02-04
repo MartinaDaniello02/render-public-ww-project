@@ -364,6 +364,7 @@ def single_data_dashboard_page(selected_dataset, title_string):
     # piu' facilmente utilizzabile
     new_cat_df = selected_dataset.copy()
     new_cat_df['Category'] = new_cat_df['Category'].apply(lambda x: x.split(' ')[0])
+    new_cat_df['Category'] = new_cat_df['Category'].replace({'YELLOW': 'YELLOW CARD'})
     supercat_count_per_year = new_cat_df.groupby(['Year', 'Category']).size().reset_index(name='Count')
 
 
@@ -1175,9 +1176,11 @@ def ssb_cw_dashboard_page(selected_dataset):
                 dcc.Graph(id="band-comparsion", style={'width': '100%', 'height': '500px'}),
             ], width=5),
             dbc.Col([
-                dcc.Graph(id = 'cw-pie', style={'width': '50%', 'height': '500px'}),
-                dcc.Graph(id = 'ssb-pie', style={'width': '50%', 'height': '500px'})
-            ], width=5),
+                html.Div([
+                    dcc.Graph(id = 'cw-pie', style={'width': '50%', 'height': '500px'}),
+                    dcc.Graph(id = 'ssb-pie', style={'width': '50%', 'height': '500px'})
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),                
+            ], width=6),
         ], justify="center", className="mb-5"),
         # Grafico di comparazione dei punteggi o qso o wpx negli anni
         dbc.Row([
@@ -1199,7 +1202,6 @@ def ssb_cw_dashboard_page(selected_dataset):
             ], width=5)            
         ], justify="center", className="mb-5"), 
         # Grafici dei vincitori. Devono essere più indipendenti l'uno dall'altro
-        # Aggiungere radio button o selezione dell'anno, eliminare click sul grafico
         dbc.Row([                    
             dbc.Col([
                 html.Div([
@@ -1214,8 +1216,10 @@ def ssb_cw_dashboard_page(selected_dataset):
         ], justify="center", className="mb-5"),
         dbc.Row([
             dbc.Col([
-                dcc.Graph(id='winner-barchart-comparsion', style={'width': '100%', 'height': '500px'}),
-                dcc.Graph(id='winner-radar', style={'width': '50%', 'height': '500px'})
+                html.Div([
+                    dcc.Graph(id='winner-barchart-comparsion', style={'width': '100%', 'height': '500px', 'margin-right':'20px'}),
+                    dcc.Graph(id='winner-radar', style={'width': '50%', 'height': '500px', 'margin-left':'20px'})
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"})
             ], width=10, style={"display": "flex", "flexDirection": "column", "alignItems": "center"})                      
         ], justify="center", className="mb-5"),
         # Mappe
@@ -1228,13 +1232,15 @@ def ssb_cw_dashboard_page(selected_dataset):
                         class_name="me-2 labels"
                     ),
                     radio_comparsion_continents
-                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center", "margin-top":"40px"}),
             ], width=10, class_name="text-center mb-3"),
         ], justify="center", className="mb-5"),
         dbc.Row([        
             dbc.Col([
-                dcc.Graph(id='participants-map-graph', style={'width': '100%', 'height': '500px'}, config={"scrollZoom": False}),
-                dcc.Graph(id='winners-map-graph', style={'width': '100%', 'height': '500px'}, config={"scrollZoom": False})
+                html.Div([
+                    dcc.Graph(id='participants-map-graph', style={'width': '100%', 'height': '700px'}, config={"scrollZoom": False}),
+                    dcc.Graph(id='winners-map-graph', style={'width': '100%', 'height': '700px'}, config={"scrollZoom": False})
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"})                
             ], width=10, style={'display':'flex', 'flexDirection': 'column', 'alignItems':'center', 'min-height': 1000})
         ], justify="center", className="mb-5")
     ], fluid=True)                   
@@ -1479,9 +1485,13 @@ def update_comparsion_map(selected_continent, selected_template, country_counts_
         title=f"Comparsion of number of participants per Country",
         color_discrete_map=color_map,
     ).update_layout(
-        margin=dict(l=5, r=5, t=70, b=20),
-        height=600,
-        width = 800,
+        margin=dict(
+            l=5, 
+            r=5, 
+            t=70, 
+            b=20
+        ),
+        height=700,
         title_y= 0.98,
         title_x=0.5, 
         geo=dict(
@@ -1528,9 +1538,13 @@ def update_comparsion_map(selected_continent, selected_template, country_counts_
         title=f"Winners Distribution",
         color_discrete_map=color_map
     ).update_layout(
-        margin=dict(l=5, r=5, t=70, b=20),
-        height=600,
-        width = 800,
+        margin=dict(
+            l=5, 
+            r=5, 
+            t=70, 
+            b=20
+        ),        
+        height=700,
         title_y= 0.98,
         title_x=0.5,
         geo=dict(
