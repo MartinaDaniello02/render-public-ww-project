@@ -156,20 +156,46 @@ app.layout = dbc.Container([
     dcc.Store(id='selected-theme', data={'dark_mode': True}),
     dcc.Store(id='selected-template', data='plotly_dark'),
     html.Link(id='theme-link', rel='stylesheet', href='/static/dark.css'),
-    dbc.NavbarSimple(
-        children=[
-            dbc.Button("Homepage", id="btn-home", color="primary", className="btn-custom-home btn btn-dark"),
-            html.H1('CQ World Wide WPX Contest  -  '),
-            html.H4('by IU1SCQ'),
-            dbc.Switch(
-                id="select-dark-mode",
-                label="Dark mode",
-                value=True,
-                style={'font-size': '30px', 'margin-top': '30px', 'margin-left': '100px'}
-            ),
-        ],
+    dbc.Navbar(
+        dbc.Container(
+            dbc.Row([
+                dbc.Col(
+                    dbc.Button(
+                        "Homepage",
+                        id="btn-home",
+                        color="primary",
+                        className="btn-custom-home btn btn-dark",
+                        style={'margin-left':'200px'},
+                    ),
+                    width="auto",
+                    className="p-0"
+                ),
+                dbc.Col(
+                    html.H1(
+                        "Data Analysis for CQ World Wide WPX Contest - by IU1SCQ",
+                        className="mb-0 text-center text-nowrap"
+                    ),
+                    className="p-0 flex-grow-1"
+                ),
+                dbc.Col(
+                    dbc.Switch(
+                        id="select-dark-mode",
+                        label="Dark mode",
+                        value=True,
+                        style={'font-size': '30px', 'margin-right':'200px'},
+                    ),
+                    width="auto",
+                    className="p-0"
+                ),
+            ], align="center", className="g-0 w-100 flex-nowrap"),
+
+            fluid=True,
+            className="w-100",
+            style={'padding-bottom':'20px', 'padding-top':'20px'},
+        ),
+
         sticky="top",
-        className="justify-content-start navbar "
+        className="w-100"
     ),
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content', children=welcome_page())

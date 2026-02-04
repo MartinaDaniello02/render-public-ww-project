@@ -6,7 +6,6 @@ body {
 .navbar{
   background-color: #d3d3d3 !important;
   color: black !important;
-  text-align: left;
 }
 
 .btn-custom {
@@ -22,9 +21,6 @@ body {
   height: 70px;
   width: 200px;
   font-size: 28px;
-  margin-top: 20px;
-  margin-left: 0px;
-  
   background-color: #7e8891 !important;
   border-color: #7e8891;
   color: black !important;
