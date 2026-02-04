@@ -467,11 +467,10 @@ def single_data_dashboard_page(selected_dataset, title_string):
         style={'font-size': '20px'},
         inline=True
     )
-
     return dbc.Container([
         dcc.Store(id='selected-data', data=selected_dataset.to_dict('records')),
-        dcc.Store(id='country-counts',data=country_counts.to_dict('records')),
-        dcc.Store(id='winner-counts', data = winner_counts.to_dict('records')),
+        dcc.Store(id='country-counts', data=country_counts.to_dict('records')),
+        dcc.Store(id='winner-counts', data=winner_counts.to_dict('records')),
         dcc.Store(id='merged-mean-data', data=merged_mean_df.to_dict('records')),
         dcc.Store(id='global-ranges', data={
             'x_min': global_x_min_buffered,
@@ -480,10 +479,10 @@ def single_data_dashboard_page(selected_dataset, title_string):
             'y_max': global_y_max_buffered
         }),
         dcc.Store(id="mean-qso-wpx", data=mean_qso_wpx_df.to_dict('records')),
-        dcc.Store(id='supercat', data = supercat_count_per_year.to_dict('records')),
+        dcc.Store(id='supercat', data=supercat_count_per_year.to_dict('records')),
         dcc.Store(id='y-data-to-plot', data='Score'),
-        dcc.Store(id='select-winner-country', data = None),
-        dcc.Store(id='winners-table', data= winners_table.to_dict('records')),
+        dcc.Store(id='select-winner-country', data=None),
+        dcc.Store(id='winners-table', data=winners_table.to_dict('records')),
         dcc.Store(id='winners-QSO-WPX-score', data={
             'max_QSO': max_QSO,
             'max_WPX': max_WPX,
@@ -498,105 +497,97 @@ def single_data_dashboard_page(selected_dataset, title_string):
             'x_max_WPX': global_x_max_WPX_buffered,
             'y_min_WPX': global_y_min_WPX_buffered,
             'y_max_WPX': global_y_max_WPX_buffered
-        }),      
+        }),
 
+        # Titolo
         dbc.Row(
             dbc.Col(
                 html.H3(f'Data from 2005 to 2024 for {title_string} contest'),
+                width=12,
+                className="text-center my-4"
             )
         ),
+
         # QSO e WPX sulle diverse bande, due linechart affiancati nelle due colonne
         # primo linechart, quello dei qso totali e sulle singole bande
         # secondo linechart, media dei wpx negli anni a confronto con la media dei qso totali
-        dbc.Row([            
-            dbc.Col([
-                html.Div([
-                    dbc.Label(
-                        "Select band:",
-                        html_for="select-band",
-                        style={'font-size':'20px', 'margin-right':'7px'}
-                    ),
-                    radio_band
-                ],style={"display": "flex", "alignItems": "center"}),                    
-                dcc.Graph(id="band-line-chart")
-            ], style={'max-width':1000, 'height':500}),
-            dbc.Col([
-                enable_qso_switch,
-                dcc.Graph(id="wpx-qso-linechart")
-            ], style={'max-width':1000, 'height':500})    
-        ]),
-            
-        # vincitori, barchart con scelta tra wpx e qso, colonna che elenca i vincitori
-        # negli anni, linechart che mostra i vincitori selezionati
-        dbc.Row([            
-            dbc.Col([
-                html.Div([
-                    dbc.Label(
-                        "Select y axis:",
-                        html_for="select-winner-y",
-                        style={'font-size':'20px', 'margin-right':'7px'}
-                    ),
-                    radio_winner_y
-                ],style={"display": "flex", "alignItems": "center"}),                
-                dcc.Graph(id='winner-barchart')
-            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
-            dbc.Col([     
-                dbc.Label(
-                    "Select winner:",
-                    html_for="winner-country-radio",
-                    style={'font-size':'20px', 'margin-right':'7px'}
-                ),           
-                radio_winner_countries,
-                ], style={'max-width':'180px', 'margin-top':'150px'}
-            ),
-            dbc.Col([
-                dcc.Graph(id="winner-linechart")
-            ], style={'max-width':1000, 'height':500, 'margin-top':'130px'})
-        ]),
         
-        # rappresentazione dei club
         dbc.Row([
             dbc.Col([
                 html.Div([
-                    dbc.Label(
-                        "Select y axis:",
-                        html_for="select-club-y",
-                        style={'font-size':'20px', 'margin-right':'7px'}
-                    ),
+                    dbc.Label("Select band:", html_for="select-band", className="me-2 labels"),
+                    radio_band
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id="band-line-chart", style={'width': '100%', 'height': '500px'})
+            ], width=5),
+
+            dbc.Col([
+                html.Div([
+                    enable_qso_switch
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id="wpx-qso-linechart", style={'width': '100%', 'height': '500px'})
+            ], width=5)
+        ], justify="center", className="mb-5"),
+
+        # vincitori, barchart con scelta tra wpx e qso, colonna che elenca i vincitori
+        # negli anni, linechart che mostra i vincitori selezionati       
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dbc.Label("Select y axis:", html_for="select-winner-y", className="me-2 labels"),
+                    radio_winner_y
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id='winner-barchart', style={'width': '100%', 'height': '500px'})
+            ], width=5),
+
+            dbc.Col([
+                dbc.Label("Select winner:", html_for="winner-country-radio", className="me-2 labels"),
+                radio_winner_countries
+            ], width=1, style={"display": "flex", "flexDirection": "column", "alignItems": "center"}),
+
+            dbc.Col([
+                dcc.Graph(id="winner-linechart", style={'width': '100%', 'height': '500px'})
+            ], width=5)
+        ], justify="center", className="mb-5"),
+
+        # Rappresentazione per i Club
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dbc.Label("Select y axis:", html_for="select-club-y", className="me-2 labels"),
                     radio_club_x
-                ],style={"display": "flex", "alignItems": "center"}),
-                dcc.Graph(id="club-chart")
-            ], style={'max-width':1000, 'height':500, 'margin-top':'100px'}),
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id="club-chart", style={'width': '100%', 'height': '500px'})
+            ], width=5),
+
             dbc.Col([
-                dcc.Graph(id='club-pie')
-            ], style={'max-width':1000, 'height':500, 'margin-top':'135px'})
-        ]),
-        #categorie di partecipazione
-        dbc.Row(
-            dbc.Col([
-                logarithmic_scale_switch,
-                dcc.Graph(id= 'category-linechart')
-            ], style={'max-width':1000, 'height':500, 'margin-top':'90px'})
-        ),
-        # mappa del mondo
+                dcc.Graph(id='club-pie', style={'width': '100%', 'height': '500px'})
+            ], width=5)
+        ], justify="center", className="mb-5"),
+
+        # Categorie di partecipazione
         dbc.Row([
             dbc.Col([
-                winner_switch,
                 html.Div([
-                    dbc.Label(
-                        "Focus on:",
-                        html_for="select-continent",
-                        style={'font-size':'20px', 'margin-right':'7px'}
-                    ),
-                    radio_continents
-                ],style={"display": "flex", "alignItems": "center"}),                
-            ], style={'width':700, 'margin-top':'120px'})
-        ]),
-        dbc.Row(
+                    logarithmic_scale_switch,
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id='category-linechart', style={'width': '100%', 'height': '500px'})
+            ], width=9),
+        ], justify="center", className="mb-5"),
+
+        # Mappa del mondo
+        dbc.Row([
             dbc.Col([
-                dcc.Graph(id="map-graph", config={"scrollZoom": False})                
-            ], style={'width':700, 'margin-top':'20px', 'margin-bottom':'100px'})
-        )
+                html.Div([
+                    winner_switch,
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                html.Div([
+                    dbc.Label("Focus on:", html_for="select-continent", className="me-2 labels"),
+                    radio_continents
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id="map-graph", style={'width': '100%', 'height': '800px'}, config={"scrollZoom": False})
+            ], width=9, className="text-center mb-3")
+        ], justify="center", className="mb-5"),
     ], fluid=True)
 
 
@@ -842,7 +833,6 @@ def update_map(selected_continent, selected_type, selected_template, country_cou
             b=60,
         ),
         height=700,
-        width = 1400,
         title_y= 0.95,
         title_x=0.5, 
         coloraxis_colorbar = color_bar,
