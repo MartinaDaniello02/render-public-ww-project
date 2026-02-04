@@ -1156,7 +1156,9 @@ def ssb_cw_dashboard_page(selected_dataset):
 
         dbc.Row(
             dbc.Col(
-                html.H3('Comparsion between SSB and CW contest data from 2005 to 2024')
+                html.H3('Comparsion between SSB and CW contest data from 2005 to 2024'),
+                width=12,
+                className="text-center my-4"
             )
         ),
         # Grafico a linee per le bande
@@ -1166,36 +1168,36 @@ def ssb_cw_dashboard_page(selected_dataset):
                     dbc.Label(
                         "Select band:",
                         html_for="select-comparsion-band",
-                        style={'font-size':'20px', 'margin-right':'7px'}
+                        class_name="me-2 labels"
                     ),
                     radio_comparsion_band
-                ],style={"display": "flex", "alignItems": "center"}),                    
-                dcc.Graph(id="band-comparsion"),
-            ], style={'max-width':1000, 'height':500}),
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),                    
+                dcc.Graph(id="band-comparsion", style={'width': '100%', 'height': '500px'}),
+            ], width=5),
             dbc.Col([
-                dcc.Graph(id = 'cw-pie', style={'max-width':500, 'height':500}),
-                dcc.Graph(id = 'ssb-pie', style={'max-width':500, 'height':500})
-            ],style={"display": "flex", "alignItems": "center"}),
-        ]),
+                dcc.Graph(id = 'cw-pie', style={'width': '50%', 'height': '500px'}),
+                dcc.Graph(id = 'ssb-pie', style={'width': '50%', 'height': '500px'})
+            ], width=5),
+        ], justify="center", className="mb-5"),
         # Grafico di comparazione dei punteggi o qso o wpx negli anni
         dbc.Row([
             # Grafico a linee per la media dei punteggi
             dbc.Col([                
-                dcc.Graph(id="score-comparsion")
-            ], style={'max-width':1000, 'height':500, 'margin-top':'70px'}),
+                dcc.Graph(id="score-comparsion", style={'width': '100%', 'height': '500px'})
+            ], width=5),
             # Grafico a linee per le medie dei WPX o dei QSO a seconda della selezione
             dbc.Col([
                 html.Div([
                     dbc.Label(
                         "Select y axis:",
                         html_for="selectline-qso-wpx-y",
-                        style={'font-size':'20px', 'margin-right':'7px', 'margin-left':'20px'}
+                        class_name="me-2 labels"
                     ),
                     radio_qso_wpx_comparsion
-                ],style={"display": "flex", "alignItems": "center"}),
-                dcc.Graph(id="qso-wpx-comparsion")
-            ], style={'max-width':1000, 'height':500, 'margin-top':'30px'})            
-        ]), 
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+                dcc.Graph(id="qso-wpx-comparsion", style={'width': '100%', 'height': '500px'})
+            ], width=5)            
+        ], justify="center", className="mb-5"), 
         # Grafici dei vincitori. Devono essere più indipendenti l'uno dall'altro
         # Aggiungere radio button o selezione dell'anno, eliminare click sul grafico
         dbc.Row([                    
@@ -1204,18 +1206,18 @@ def ssb_cw_dashboard_page(selected_dataset):
                     dbc.Label(
                         "Select y axis:",
                         html_for="select-y-barchart-comparsion",
-                        style={'font-size':'20px', 'margin-right':'7px'}
+                        class_name="me-2 labels"
                     ),
                     radio_comparsion_winner_axis
-                ],style={"display": "flex", "alignItems": "center"}),                
-            ], style={'margin-top':'30px'})
-        ]),
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),                
+            ], width=10)
+        ], justify="center", className="mb-5"),
         dbc.Row([
             dbc.Col([
-                dcc.Graph(id='winner-barchart-comparsion'),
-                dcc.Graph(id='winner-radar')
-            ],style={"display": "flex", "alignItems": "center"})                      
-        ]),
+                dcc.Graph(id='winner-barchart-comparsion', style={'width': '100%', 'height': '500px'}),
+                dcc.Graph(id='winner-radar', style={'width': '50%', 'height': '500px'})
+            ], width=10, style={"display": "flex", "flexDirection": "column", "alignItems": "center"})                      
+        ], justify="center", className="mb-5"),
         # Mappe
         dbc.Row([
             dbc.Col([
@@ -1223,18 +1225,18 @@ def ssb_cw_dashboard_page(selected_dataset):
                     dbc.Label(
                         "Focus on:",
                         html_for="select-comparsion-continent",
-                        style={'font-size':'20px', 'margin-right':'15px', 'margin-left':'20px', 'margin-top':'5px'}
+                        class_name="me-2 labels"
                     ),
                     radio_comparsion_continents
-                ],style={"display": "flex", "alignItems": "center"}),
-            ],style={"margin-top": "50px"}),
-        ]),
+                ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),
+            ], width=10, class_name="text-center mb-3"),
+        ], justify="center", className="mb-5"),
         dbc.Row([        
             dbc.Col([
-                dcc.Graph(id='participants-map-graph', config={"scrollZoom": False}),
-                dcc.Graph(id='winners-map-graph', config={"scrollZoom": False})
-            ], style={'display':'flex', 'min-height': 1000})
-        ])
+                dcc.Graph(id='participants-map-graph', style={'width': '100%', 'height': '500px'}, config={"scrollZoom": False}),
+                dcc.Graph(id='winners-map-graph', style={'width': '100%', 'height': '500px'}, config={"scrollZoom": False})
+            ], width=10, style={'display':'flex', 'flexDirection': 'column', 'alignItems':'center', 'min-height': 1000})
+        ], justify="center", className="mb-5")
     ], fluid=True)                   
  
 #################################################################
