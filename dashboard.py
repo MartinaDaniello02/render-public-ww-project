@@ -1212,15 +1212,13 @@ def ssb_cw_dashboard_page(selected_dataset):
                     ),
                     radio_comparsion_winner_axis
                 ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"}),                
-            ], width=10)
-        ], justify="center", className="mb-5"),
-        dbc.Row([
+                dcc.Graph(id='winner-barchart-comparsion', style={'width': '100%', 'height': '500px', 'margin-right':'20px'}),
+            ], width=5),
             dbc.Col([
                 html.Div([
-                    dcc.Graph(id='winner-barchart-comparsion', style={'width': '100%', 'height': '500px', 'margin-right':'20px'}),
-                    dcc.Graph(id='winner-radar', style={'width': '50%', 'height': '500px', 'margin-left':'20px'})
+                    dcc.Graph(id='winner-radar', style={'width': '100%', 'height': '500px', 'margin-left':'20px'})
                 ], style={"display": "flex", "alignItems": "center", "justifyContent": "center"})
-            ], width=10, style={"display": "flex", "flexDirection": "column", "alignItems": "center"})                      
+            ], width=5)                      
         ], justify="center", className="mb-5"),
         # Mappe
         dbc.Row([
